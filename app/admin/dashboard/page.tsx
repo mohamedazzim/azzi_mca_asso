@@ -54,6 +54,7 @@ interface QuickActionProps {
 
 interface TopPerformerProps {
   student: {
+    id: string;
     name: string;
     rollNumber: string;
     awards: number;
@@ -106,22 +107,24 @@ const EventCard = memo<{ event: UpcomingEvent }>(({ event }) => (
 EventCard.displayName = "EventCard"
 
 const TopPerformerCard = memo<TopPerformerProps>(({ student }) => (
-  <div className="flex flex-col items-center p-2">
-    <Avatar className="h-12 w-12 mb-1">
-      <AvatarImage 
-        src={/^[a-f0-9]{24}$/i.test(student.name) ? "https://res.cloudinary.com/dgxjdpnze/raw/upload/v1752423664/static/placeholders/1752423659099-placeholder.svg" : student.photo} 
-        alt={student.name} 
-      />
-      <AvatarFallback>
-        {/^[a-f0-9]{24}$/i.test(student.name) ? '?' : (student.name ? student.name.split(' ').map((n: string) => n[0]).join('') : '?')}
-      </AvatarFallback>
-    </Avatar>
-    <div className="text-base font-bold mb-0.5">
-      {/^[a-f0-9]{24}$/i.test(student.name) ? 'Unknown Student' : student.name}
+  <Link href={`/admin/students/${student.id}`} className="block">
+    <div className="flex flex-col items-center p-2 cursor-pointer hover:bg-gray-50 rounded">
+      <Avatar className="h-12 w-12 mb-1">
+        <AvatarImage 
+          src={/^[a-f0-9]{24}$/i.test(student.name) ? "https://res.cloudinary.com/dgxjdpnze/raw/upload/v1752423664/static/placeholders/1752423659099-placeholder.svg" : student.photo} 
+          alt={student.name} 
+        />
+        <AvatarFallback>
+          {/^[a-f0-9]{24}$/i.test(student.name) ? '?' : (student.name ? student.name.split(' ').map((n: string) => n[0]).join('') : '?')}
+        </AvatarFallback>
+      </Avatar>
+      <div className="text-base font-bold mb-0.5">
+        {/^[a-f0-9]{24}$/i.test(student.name) ? 'Unknown Student' : student.name}
+      </div>
+      <div className="text-xs text-gray-600 mb-0">Roll: {student.rollNumber}</div>
+      <div className="text-sm font-semibold text-green-700">Wins: {student.awards}</div>
     </div>
-    <div className="text-xs text-gray-600 mb-0">Roll: {student.rollNumber}</div>
-    <div className="text-sm font-semibold text-green-700">Wins: {student.awards}</div>
-  </div>
+  </Link>
 ))
 TopPerformerCard.displayName = "TopPerformerCard"
 
@@ -184,6 +187,7 @@ function AdminDashboardContent() {
   const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [topPerformers, setTopPerformers] = useState<Array<{
+    id: string;
     name: string;
     rollNumber: string;
     awards: number;
