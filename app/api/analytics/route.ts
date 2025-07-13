@@ -55,10 +55,14 @@ export async function GET(request: Request) {
     }
 
     // Top performers (students with most awards)
+    // Only include winners whose eventId matches an existing event
+    const existingEventIds = new Set(events.map(e => e._id?.toString()))
     const winners = await winnersCollection.find(eventQuery.eventDate ? { eventDate: eventQuery.eventDate } : {}).toArray()
     const winnerMap: Record<string, { name: string, rollNumber: string, events: number, awards: number, photo?: string }> = {}
     for (const w of winners) {
       if (!w.studentId) continue
+      // Only count if winner's eventId is in existing events
+      if (!w.eventId || !existingEventIds.has(w.eventId.toString())) continue;
       let student = null;
       try {
         student = await studentsCollection.findOne({ _id: new ObjectId(w.studentId) })
