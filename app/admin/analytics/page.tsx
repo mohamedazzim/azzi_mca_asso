@@ -92,17 +92,19 @@ interface TopPerformerProps {
 }
 
 const TopPerformer = memo<TopPerformerProps>(({ performer }) => (
-  <div className="flex items-center gap-3 p-2 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
-    <Avatar className="h-10 w-10">
-      <AvatarImage src={performer.photo} alt={performer.name} />
-      <AvatarFallback>{performer.name.split(' ').map((n: string) => n[0]).join('')}</AvatarFallback>
-    </Avatar>
-    <div>
-      <div className="font-semibold">{performer.name}</div>
-      <div className="text-xs text-gray-500">Roll: {performer.rollNumber}</div>
-      <div className="text-xs text-green-700 font-bold">Awards: {performer.awards}</div>
+  <Link href={`/admin/students/${performer.rollNumber}`} className="block">
+    <div className="flex items-center gap-3 p-2 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+      <Avatar className="h-10 w-10">
+        <AvatarImage src={performer.photo} alt={performer.name} />
+        <AvatarFallback>{performer.name.split(' ').map((n: string) => n[0]).join('')}</AvatarFallback>
+      </Avatar>
+      <div>
+        <div className="font-semibold">{performer.name}</div>
+        <div className="text-xs text-gray-500">Roll: {performer.rollNumber}</div>
+        <div className="text-xs text-green-700 font-bold">Awards: {performer.awards}</div>
+      </div>
     </div>
-  </div>
+  </Link>
 ))
 TopPerformer.displayName = "TopPerformer"
 
