@@ -86,6 +86,14 @@ export async function GET(request: NextRequest) {
         today.setHours(0,0,0,0);
         if (eventDate < today) status = 'completed';
       }
+      // Ensure reportUrl is a Cloudinary URL or null
+      let reportUrl = event.reportUrl || null;
+      if (reportUrl && reportUrl.startsWith('/uploads/')) {
+        // Option 1: Set to null to avoid broken links
+        reportUrl = null;
+        // Option 2: If you have a mapping from local to Cloudinary, you can set it here
+        // reportUrl = mapLocalToCloudinary(reportUrl);
+      }
       return {
         id: event._id?.toString(),
         title: event.title,
@@ -96,7 +104,7 @@ export async function GET(request: NextRequest) {
         description: event.description,
         status,
         createdAt: event.createdAt,
-        reportUrl: event.reportUrl || null,
+        reportUrl,
         attendanceSheetUrl: event.attendanceSheetUrl || null,
         photoUrls: event.photoUrls || [],
         isCompetition: (event as any).isCompetition || false,
@@ -341,5 +349,3 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     return NextResponse.json({ error: "Failed to delete event" }, { status: 500 })
   }
 }
-
-
