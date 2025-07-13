@@ -31,6 +31,7 @@ interface AnalyticsData {
     events: number
     awards: number
     photo?: string
+    id: string // Added id to the interface
   }>
   eventTypes: Array<{
     type: string
@@ -88,11 +89,12 @@ interface TopPerformerProps {
     events: number
     awards: number
     photo?: string
+    id: string // Added id to the interface
   }
 }
 
 const TopPerformer = memo<TopPerformerProps>(({ performer }) => (
-  <Link href={`/admin/students/${performer.rollNumber}`} className="block">
+  <Link href={`/admin/students/${performer.id}`} className="block">
     <div className="flex items-center gap-3 p-2 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer">
       <Avatar className="h-10 w-10">
         <AvatarImage src={performer.photo} alt={performer.name} />
