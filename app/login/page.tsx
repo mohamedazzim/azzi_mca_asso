@@ -250,9 +250,7 @@ export default function LoginPage() {
           error={error}
         />
         
-        <div className="mt-6">
-          <DemoCredentials />
-        </div>
+        
       </div>
       
       {/* Animations */}
