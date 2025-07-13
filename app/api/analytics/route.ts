@@ -58,7 +58,7 @@ export async function GET(request: Request) {
     // Only include winners whose eventId matches an existing event
     const existingEventIds = new Set(events.map(e => e._id?.toString()))
     const winners = await winnersCollection.find(eventQuery.eventDate ? { eventDate: eventQuery.eventDate } : {}).toArray()
-    const winnerMap: Record<string, { name: string, rollNumber: string, events: number, awards: number, photo?: string }> = {}
+    const winnerMap: Record<string, { id: string, name: string, rollNumber: string, events: number, awards: number, photo?: string }> = {}
     for (const w of winners) {
       if (!w.studentId) continue
       // Only count if winner's eventId is in existing events
@@ -72,6 +72,7 @@ export async function GET(request: Request) {
       if (!student) continue; // Only count if student exists
       if (!winnerMap[w.studentId]) {
         winnerMap[w.studentId] = {
+          id: student._id?.toString(),
           name: student.name,
           rollNumber: student.rollNumber,
           events: 0,
