@@ -63,13 +63,12 @@ const StudentRow = memo<StudentRowProps>(({ student, selected, onSelect, role, d
     </TableCell>
     <TableCell>
       <div className="flex items-center space-x-3">
-        <Image 
-          src={student.photo} 
-          alt={student.name} 
-          width={32} 
-          height={32} 
-          className="rounded-full object-cover" 
-        />
+        <Avatar className="h-8 w-8">
+          <AvatarImage src={student.photo || undefined} alt={student.name} />
+          <AvatarFallback className="text-xs">
+            {student.name.split(' ').map((n: string) => n[0]).join('')}
+          </AvatarFallback>
+        </Avatar>
         <div>
           <p className="font-medium">{student.name}</p>
           <p className="text-sm text-gray-600">{student.gender}</p>
