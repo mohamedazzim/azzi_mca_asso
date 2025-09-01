@@ -36,15 +36,17 @@ class UserStorage {
     if (!this.users.has('admin')) {
       this.users.set('admin', {
         username: 'admin',
-        password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
-        role: 'admin'
+        password: '$2a$10$Q2urmX.bMvLoIklKFip0iOyvK69b5Dygd30IeLHQNfU.MJg9tTHJe', // admin
+        role: 'admin',
+        fullName: 'Administrator'
       });
     }
     if (!this.users.has('staff')) {
       this.users.set('staff', {
         username: 'staff',
-        password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
-        role: 'staff'
+        password: '$2a$10$YMZBsjG81gyFTo0sVRyv3eCVw/rc5lkQ9SI7IUuqbLlRXhqRXZJ5y', // staff
+        role: 'staff',
+        fullName: 'Staff User'
       });
     }
   }

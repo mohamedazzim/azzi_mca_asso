@@ -17,6 +17,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { getUserRole } from "@/lib/utils"
+import { useAuth } from "@/hooks/useAuth"
 
 interface Student {
   id: string
@@ -51,12 +52,12 @@ interface StudentRowProps {
   student: Student
   selected: boolean
   onSelect: (id: string) => void
-  role: string
+  canEdit: boolean
   deletingId: string | null
   deleteStudent: (id: string) => void
 }
 
-const StudentRow = memo<StudentRowProps>(({ student, selected, onSelect, role, deletingId, deleteStudent }) => (
+const StudentRow = memo<StudentRowProps>(({ student, selected, onSelect, canEdit, deletingId, deleteStudent }) => (
   <TableRow key={student.id}>
     <TableCell>
       <input type="checkbox" checked={selected} onChange={() => onSelect(student.id)} />
@@ -86,7 +87,7 @@ const StudentRow = memo<StudentRowProps>(({ student, selected, onSelect, role, d
             View
           </Button>
         </Link>
-        {role === "admin" && (
+        {canEdit && (
           <Link href={`/admin/students/${student.id}/edit`}>
             <Button variant="outline" size="sm">
               <Edit className="h-4 w-4" />
@@ -94,7 +95,7 @@ const StudentRow = memo<StudentRowProps>(({ student, selected, onSelect, role, d
             </Button>
           </Link>
         )}
-        {role === "admin" && (
+        {canEdit && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button 
@@ -207,6 +208,7 @@ const SearchSkeleton = () => (
 function StudentsPageContent() {
   const router = useRouter()
   const { toast } = useToast()
+  const { canEdit } = useAuth()
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
@@ -214,7 +216,6 @@ function StudentsPageContent() {
   const [batchFilter, setBatchFilter] = useState("all")
   const [sectionFilter, setSectionFilter] = useState("all")
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [role, setRole] = useState<string>("")
   const [pdfDialogOpen, setPdfDialogOpen] = useState(false)
   const [pdfUploading, setPdfUploading] = useState(false)
   const [pdfResult, setPdfResult] = useState<any>(null)
@@ -229,12 +230,6 @@ function StudentsPageContent() {
   const [sortField, setSortField] = useState<string>("rollNumber")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const user = JSON.parse(localStorage.getItem("user") || "{}")
-      setRole(user.role || "")
-    }
-  }, [])
 
   // Fetch students from API
   const fetchStudents = useCallback(async () => {
@@ -275,7 +270,7 @@ function StudentsPageContent() {
   const deleteStudent = async (id: string) => {
     try {
       setDeletingId(id)
-      const userRole = getUserRole()
+      const userRole = canEdit ? 'admin' : 'staff'
       
       const response = await fetch(`/api/students/${id}`, {
         method: 'DELETE',
@@ -371,7 +366,7 @@ function StudentsPageContent() {
     if (!window.confirm(`Delete ${selectedIds.length} selected students?`)) return
     setLoading(true)
     try {
-      const userRole = getUserRole()
+      const userRole = canEdit ? 'admin' : 'staff'
       const response = await fetch('/api/students/bulk-delete', {
         method: 'POST',
         headers: {
@@ -475,7 +470,7 @@ function StudentsPageContent() {
               </div>
             </div>
             <div className="flex space-x-2">
-              {role === "admin" && (
+              {canEdit && (
                   <Button onClick={() => router.push("/admin/students/add")}> <Plus className="mr-2 h-4 w-4" /> Add Student </Button>
               )}
             </div>
@@ -566,7 +561,7 @@ function StudentsPageContent() {
                           student={student} 
                           selected={selectedIds.includes(student.id)} 
                           onSelect={handleSelectOne}
-                          role={role}
+                          canEdit={canEdit}
                           deletingId={deletingId}
                           deleteStudent={deleteStudent}
                         />

@@ -13,6 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from "@/hooks/use-toast"
 import Image from 'next/image';
 import { memo } from 'react';
+import { useAuth } from "@/hooks/useAuth"
 
 interface Event {
   id: string
@@ -30,6 +31,7 @@ interface Event {
 
 function EventsPageContent() {
   const { toast } = useToast()
+  const { canEdit } = useAuth()
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
@@ -150,12 +152,13 @@ function EventsPageContent() {
     deleteEvent(id);
   };
 
-  const EventRow = memo(function EventRow({ event, onView, onEdit, onDelete, loading }: {
+  const EventRow = memo(function EventRow({ event, onView, onEdit, onDelete, loading, canEdit }: {
     event: Event;
     onView: (id: string) => void;
     onEdit: (id: string) => void;
     onDelete: (id: string) => void;
     loading: boolean;
+    canEdit: boolean;
   }) {
     return (
       <TableRow key={event.id}>
@@ -192,41 +195,45 @@ function EventsPageContent() {
             <Button variant="outline" size="sm" onClick={() => onView(event.id)}>
               <Eye className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="sm" onClick={() => onEdit(event.id)}>
-              <Edit className="h-4 w-4" />
-            </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="h-4 w-4" />
-                  )}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Event</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to delete &quot;{event.title}&quot;? This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => onDelete(event.id)}
-                    className="bg-red-600 hover:bg-red-700"
+            {canEdit && (
+              <Button variant="outline" size="sm" onClick={() => onEdit(event.id)}>
+                <Edit className="h-4 w-4" />
+              </Button>
+            )}
+            {canEdit && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    disabled={loading}
                   >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Event</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete &quot;{event.title}&quot;? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => onDelete(event.id)}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
         </TableCell>
       </TableRow>
@@ -251,12 +258,14 @@ function EventsPageContent() {
                 <p className="text-gray-600">Manage all department events</p>
               </div>
             </div>
-            <Link href="/admin/events/add">
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Event
-              </Button>
-            </Link>
+            {canEdit && (
+              <Link href="/admin/events/add">
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Event
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </header>
@@ -317,7 +326,7 @@ function EventsPageContent() {
                   </TableHeader>
                   <TableBody>
                     {filteredEvents.map((event: Event) => (
-                      <EventRow key={event.id} event={event} onView={handleView} onEdit={handleEdit} onDelete={handleDelete} loading={deletingId === event.id} />
+                      <EventRow key={event.id} event={event} onView={handleView} onEdit={handleEdit} onDelete={handleDelete} loading={deletingId === event.id} canEdit={canEdit} />
                     ))}
                   </TableBody>
                 </Table>
