@@ -1,0 +1,15 @@
+{
+  "name": "Diana Prince",
+  "rollNumber": "MCA2022002",
+  "email": "diana.prince@example.com",
+  "phone": "9876543213",
+  "batch": "2022",
+  "batchYear": "2022",
+  "section": "A",
+  "gender": "Female",
+  "dateOfBirth": "2000-03-25T00:00:00.000Z",
+  "isActive": true,
+  "id": "eb39eee6-80f2-4dc3-9a77-914ced09a0e4",
+  "createdAt": "2025-09-01T18:41:56.434Z",
+  "updatedAt": "2025-09-01T18:41:56.434Z"
+}

@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getStudents, Student } from "@/lib/db"
-import { ObjectId } from "mongodb"
+import { StudentStorage } from "@/lib/local-storage"
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,55 +11,63 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1", 10)
     const pageSize = parseInt(searchParams.get("pageSize") || "20", 10)
     const sortField = searchParams.get("sortField") || "rollNumber"
-    const sortOrder = searchParams.get("sortOrder") === "desc" ? -1 : 1
+    const sortOrder = searchParams.get("sortOrder") || "asc"
 
-    const studentsCollection = await getStudents()
-    const query: Record<string, unknown> = {}
-
-    // Apply search filter (name, rollNumber, email, phone)
+    // Build filters object for local storage
+    const filters: any = {}
+    
     if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { rollNumber: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
-        { phone: { $regex: search, $options: 'i' } }
-      ]
+      filters.search = search
     }
-
-    // Apply batch filter
     if (batchFilter && batchFilter !== "all") {
-      query.batch = batchFilter
+      filters.batchYear = batchFilter
     }
-
-    // Apply section filter
     if (sectionFilter && sectionFilter !== "all") {
-      query.section = sectionFilter
+      filters.section = sectionFilter
     }
 
-    // Pagination logic
-    const skip = (page - 1) * pageSize
-    const total = await studentsCollection.countDocuments(query)
-    const sort: any = {}
-    if (["name", "rollNumber"].includes(sortField)) {
-      sort[sortField] = sortOrder
-    } else {
-      sort["rollNumber"] = 1
+    // Get all students with filters
+    let students = await StudentStorage.getAllStudents(filters)
+    
+    // Apply additional search filter if needed
+    if (search) {
+      const searchLower = search.toLowerCase()
+      students = students.filter(student => 
+        student.name?.toLowerCase().includes(searchLower) ||
+        student.rollNumber?.toLowerCase().includes(searchLower) ||
+        student.email?.toLowerCase().includes(searchLower) ||
+        student.phone?.toLowerCase().includes(searchLower)
+      )
     }
-    const students = await studentsCollection.find(query).sort(sort).skip(skip).limit(pageSize).toArray()
+
+    // Apply sorting
+    students.sort((a, b) => {
+      const aVal = a[sortField] || ''
+      const bVal = b[sortField] || ''
+      const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0
+      return sortOrder === 'desc' ? -comparison : comparison
+    })
+
+    // Calculate total before pagination
+    const total = students.length
+
+    // Apply pagination
+    const skip = (page - 1) * pageSize
+    const paginatedStudents = limit ? students.slice(0, parseInt(limit)) : students.slice(skip, skip + pageSize)
 
     // Transform data for frontend
-    const transformedStudents = students.map(student => ({
-      id: student._id?.toString(),
+    const transformedStudents = paginatedStudents.map(student => ({
+      id: student.id,
       name: student.name,
       rollNumber: student.rollNumber,
       email: student.email,
       phone: student.phone,
-      batch: student.batch,
+      batch: student.batch || student.batchYear,
       section: student.section,
       gender: student.gender,
       dob: student.dateOfBirth,
-      photo: student.photoData ? `/api/students/${student._id}/photo` : "https://res.cloudinary.com/dgxjdpnze/raw/upload/v1752423664/static/placeholders/1752423659099-placeholder.svg",
-      isActive: student.isActive,
+      photo: student.photoPath ? `/api/students/${student.id}/photo` : null,
+      isActive: student.isActive !== false, // default to true if not specified
       createdAt: student.createdAt,
     }))
 
@@ -77,139 +84,42 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Bulk delete endpoint
 export async function POST(request: NextRequest) {
-  if (request.url.endsWith("/bulk-delete")) {
-    // Bulk delete logic
-    const role = request.headers.get("x-user-role")
-    if (role !== "admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-    }
-    try {
-      const { ids } = await request.json()
-      if (!Array.isArray(ids) || ids.length === 0) {
-        return NextResponse.json({ error: "No student IDs provided" }, { status: 400 })
-      }
-      const studentsCollection = await getStudents()
-      const objectIds = ids.map((id: string) => new ObjectId(id))
-      const result = await studentsCollection.deleteMany({ _id: { $in: objectIds } })
-      return NextResponse.json({ success: true, deletedCount: result.deletedCount })
-    } catch (error) {
-      console.error("Error bulk deleting students:", error)
-      return NextResponse.json({ error: "Failed to bulk delete students" }, { status: 500 })
-    }
-  }
-  if (request.url.endsWith("/bulk-get")) {
-    try {
-      const { ids } = await request.json();
-      console.log("bulk-get incoming ids:", ids);
-      if (!Array.isArray(ids) || ids.length === 0) {
-        return NextResponse.json({ error: "No student IDs provided" }, { status: 400 });
-      }
-      // Validate all IDs
-      const invalidId = ids.find((id: string) => !/^[a-fA-F0-9]{24}$/.test(id));
-      if (invalidId) {
-        return NextResponse.json({ error: `Invalid student ID: ${invalidId}` }, { status: 400 });
-      }
-      const studentsCollection = await getStudents();
-      const objectIds = ids.map((id: string) => new ObjectId(id));
-      const students = await studentsCollection.find({ _id: { $in: objectIds } }).toArray();
-      const result = students.map(student => ({
-        id: student._id?.toString(),
-        name: student.name,
-        rollNumber: student.rollNumber,
-        batch: student.batch,
-        section: student.section,
-        photo: student.photoData ? `/api/students/${student._id}/photo` : "https://res.cloudinary.com/dgxjdpnze/raw/upload/v1752423664/static/placeholders/1752423659099-placeholder.svg",
-      }));
-      return NextResponse.json({ students: result });
-    } catch (error) {
-      console.error("Error in bulk-get:", error);
-      return NextResponse.json({ error: "Failed to fetch students" }, { status: 500 });
-    }
-  }
   const role = request.headers.get("x-user-role")
   if (role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
+
   try {
     const studentData = await request.json()
-
+    
     // Validate required fields
-    const requiredFields = ['name', 'rollNumber', 'email', 'phone', 'batch', 'section', 'dateOfBirth']
-    for (const field of requiredFields) {
-      if (!studentData[field]) {
-        return NextResponse.json({ error: `${field} is required` }, { status: 400 })
-      }
+    if (!studentData.name || !studentData.rollNumber || !studentData.email) {
+      return NextResponse.json({ error: "Name, roll number, and email are required" }, { status: 400 })
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(studentData.email)) {
-      return NextResponse.json({ error: "Invalid email format" }, { status: 400 })
+    // Check if student with same roll number already exists
+    const existingStudents = await StudentStorage.getAllStudents()
+    const existingStudent = existingStudents.find(s => s.rollNumber === studentData.rollNumber)
+    if (existingStudent) {
+      return NextResponse.json({ error: "Student with this roll number already exists" }, { status: 400 })
     }
 
-    // Validate phone number (basic validation)
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/
-    if (!phoneRegex.test(studentData.phone.replace(/\s/g, ''))) {
-      return NextResponse.json({ error: "Invalid phone number format" }, { status: 400 })
+    // Prepare student data
+    const newStudentData = {
+      ...studentData,
+      batchYear: studentData.batch || studentData.batchYear || new Date().getFullYear().toString(),
+      isActive: studentData.isActive !== false,
+      dateOfBirth: studentData.dateOfBirth ? new Date(studentData.dateOfBirth) : new Date(),
     }
 
-    // Validate roll number format (basic validation)
-    if (studentData.rollNumber.length < 3) {
-      return NextResponse.json({ error: "Roll number must be at least 3 characters long" }, { status: 400 })
-    }
+    const studentId = await StudentStorage.saveStudent(newStudentData)
 
-    const studentsCollection = await getStudents()
-
-    // Check for duplicate rollNumber
-    const existingRoll = await studentsCollection.findOne({ rollNumber: studentData.rollNumber })
-    if (existingRoll) {
-      return NextResponse.json({ error: "Roll number already exists" }, { status: 400 })
-    }
-    // Check for duplicate email
-    const existingEmail = await studentsCollection.findOne({ email: studentData.email })
-    if (existingEmail) {
-      return NextResponse.json({ error: "Email already exists" }, { status: 400 })
-    }
-
-    // Prepare student object
-    const newStudent: any = {
-      name: studentData.name,
-      rollNumber: studentData.rollNumber,
-      email: studentData.email,
-      phone: studentData.phone,
-      batch: studentData.batch,
-      section: studentData.section,
-      gender: studentData.gender,
-      dateOfBirth: new Date(studentData.dateOfBirth),
-      bloodGroup: studentData.bloodGroup,
-      guardianName: studentData.guardianName,
-      guardianPhone: studentData.guardianPhone,
-      address: studentData.address,
-      hostellerStatus: studentData.hostellerStatus,
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const result = await studentsCollection.insertOne(newStudent)
-    newStudent._id = result.insertedId
-
-    return NextResponse.json({
-      id: newStudent._id?.toString(),
-      name: newStudent.name,
-      rollNumber: newStudent.rollNumber,
-      email: newStudent.email,
-      phone: newStudent.phone,
-      batch: newStudent.batch,
-      section: newStudent.section,
-      gender: newStudent.gender,
-      dob: newStudent.dateOfBirth,
-      photo: newStudent.photoUrl || "https://res.cloudinary.com/dgxjdpnze/raw/upload/v1752423664/static/placeholders/1752423659099-placeholder.svg",
-      isActive: newStudent.isActive,
-      createdAt: newStudent.createdAt,
-    }, { status: 201 })
+    return NextResponse.json({ 
+      success: true, 
+      message: "Student created successfully", 
+      studentId 
+    })
   } catch (error) {
     console.error("Error creating student:", error)
     return NextResponse.json({ error: "Failed to create student" }, { status: 500 })

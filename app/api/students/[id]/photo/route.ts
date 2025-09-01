@@ -1,6 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getStudents } from "@/lib/db"
-import { ObjectId } from "mongodb"
+import { StudentStorage } from "@/lib/local-storage"
+import path from "path"
+
+// Default placeholder image as base64 SVG
+const DEFAULT_AVATAR_SVG = `<svg width="150" height="150" viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="150" height="150" fill="#E5E7EB"/>
+<circle cx="75" cy="60" r="25" fill="#9CA3AF"/>
+<path d="M75 90C95 90 110 105 110 125H40C40 105 55 90 75 90Z" fill="#9CA3AF"/>
+</svg>`;
 
 export async function GET(
   request: NextRequest,
@@ -9,56 +16,44 @@ export async function GET(
   try {
     const { id } = await params
 
-    if (!ObjectId.isValid(id)) {
+    if (!id || id.length < 1) {
       return NextResponse.json({ error: "Invalid student ID" }, { status: 400 })
     }
 
-    const studentsCollection = await getStudents()
-    let student = await studentsCollection.findOne({ _id: new ObjectId(id) })
-    if (!student) {
-      student = await studentsCollection.findOne({ _id: id })
-      console.log('Photo fetch: tried string _id', id, 'found:', !!student)
-    } else {
-      console.log('Photo fetch: tried ObjectId _id', id, 'found:', !!student)
+    console.log('Photo fetch: trying to get photo for student ID', id)
+
+    const photoData = await StudentStorage.getStudentPhoto(id)
+    
+    if (!photoData) {
+      console.log('Photo fetch: no photo found, returning default avatar')
+      // Return default avatar as SVG
+      return new NextResponse(DEFAULT_AVATAR_SVG, {
+        headers: {
+          'Content-Type': 'image/svg+xml',
+          'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+        },
+      })
     }
 
-    if (!student) {
-      return NextResponse.json({ error: "Student not found" }, { status: 404 })
-    }
-
-    if (!student.photoData) {
-      // Return a placeholder image instead of an error
-      return NextResponse.redirect("https://res.cloudinary.com/dgxjdpnze/raw/upload/v1752423664/static/placeholders/1752423659099-placeholder.svg");
-    }
-
-    // Convert to Buffer if needed
-    let buffer: Buffer
-    if (Buffer.isBuffer(student.photoData)) {
-      buffer = student.photoData
-    } else if (
-      typeof student.photoData === 'object' &&
-      student.photoData !== null &&
-      '_bsontype' in student.photoData &&
-      (student.photoData as any)._bsontype === 'Binary' &&
-      'buffer' in student.photoData
-    ) {
-      buffer = Buffer.from((student.photoData as any).buffer)
-    } else {
-      buffer = Buffer.from(student.photoData as Buffer)
-    }
+    console.log('Photo fetch: found photo, size:', photoData.buffer.length)
 
     // Return the photo as a response with proper content type
-    return new NextResponse(buffer, {
+    return new NextResponse(photoData.buffer, {
       headers: {
-        'Content-Type': student.photoContentType || 'image/jpeg',
+        'Content-Type': photoData.contentType || 'image/jpeg',
         'Cache-Control': 'public, max-age=31536000', // Cache for 1 year
-        'Content-Length': buffer.length.toString(),
+        'Content-Length': photoData.buffer.length.toString(),
       },
     })
 
   } catch (error) {
     console.error("Error fetching student photo:", error)
-    // Return a placeholder image on error instead of JSON error
-    return NextResponse.redirect("https://res.cloudinary.com/dgxjdpnze/raw/upload/v1752423664/static/placeholders/1752423659099-placeholder.svg");
+    // Return default avatar on error
+    return new NextResponse(DEFAULT_AVATAR_SVG, {
+      headers: {
+        'Content-Type': 'image/svg+xml',
+        'Cache-Control': 'public, max-age=3600',
+      },
+    })
   }
-} 
+}

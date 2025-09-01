@@ -1,0 +1,15 @@
+{
+  "title": "Alumni Meet 2025",
+  "eventDate": "2025-04-25T00:00:00.000Z",
+  "location": "Conference Hall",
+  "chiefGuest": "Distinguished Alumni",
+  "fundSpent": 20000,
+  "description": "Annual alumni gathering and networking event.",
+  "eventType": "Networking",
+  "status": "upcoming",
+  "isCompetition": false,
+  "participants": [],
+  "id": "f22d529c-ffe2-4570-9301-1da04368d717",
+  "createdAt": "2025-09-01T18:41:56.437Z",
+  "updatedAt": "2025-09-01T18:41:56.437Z"
+}

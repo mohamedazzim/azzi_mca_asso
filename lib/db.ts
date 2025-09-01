@@ -1,6 +1,7 @@
-import clientPromise from './mongodb'
-import { ObjectId } from "mongodb"
+// Local database replacement - no longer using MongoDB
+import { getStudents, getEvents, getUsers, getWinners } from "./local-db"
 
+// Keep interfaces for type compatibility
 export interface User {
   _id?: string
   username: string
@@ -13,12 +14,14 @@ export interface User {
 }
 
 export interface Student {
-  _id?: string | ObjectId
+  _id?: string
+  id?: string  // For local storage compatibility
   name: string
   rollNumber: string
   email: string
   phone: string
   batch: string
+  batchYear?: string  // For local storage organization
   section?: string
   class?: string // Added for compatibility
   category?: string // Added for compatibility
@@ -26,6 +29,7 @@ export interface Student {
   dateOfBirth: Date
   photoUrl?: string
   photoData?: Buffer
+  photoPath?: string  // For local file storage
   photoContentType?: string
   photoFileName?: string
   address?: string
@@ -36,11 +40,12 @@ export interface Student {
   isActive: boolean
   createdAt: Date
   updatedAt: Date
-  participations?: Array<{ eventId: string | ObjectId, eventTitle: string, date: Date, award?: string, position?: number }>
+  participations?: Array<{ eventId: string, eventTitle: string, date: Date, award?: string, position?: number }>
 }
 
 export interface Event {
-  _id?: ObjectId | string
+  _id?: string
+  id?: string  // For local storage compatibility
   title: string
   eventDate: Date
   location: string
@@ -49,12 +54,16 @@ export interface Event {
   description?: string
   eventType?: string
   attendanceSheetUrl?: string
+  attendanceSheetPath?: string  // For local file storage
   reportUrl?: string // Added for uploaded event report
+  reportPath?: string  // For local file storage
   photoUrls?: string[] // Added for uploaded event photos
+  photoPaths?: string[]  // For local file storage
   status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled'
   isCompetition?: boolean // Added for competition events
   createdAt: Date
   updatedAt: Date
+  participants?: string[]  // Array of student IDs
 }
 
 export interface EventParticipation {
@@ -81,33 +90,11 @@ export interface Winner {
   createdAt: Date
 }
 
-// Database operations
-export async function getUsers() {
-  const client = await clientPromise
-  const db = client.db('college_management')
-  return db.collection<User>('users')
-}
+// Export the local storage collection getters
+export { getUsers, getStudents, getEvents, getWinners };
 
-export async function getStudents() {
-  const client = await clientPromise
-  const db = client.db('college_management')
-  return db.collection<Student>('students')
-}
-
-export async function getEvents() {
-  const client = await clientPromise
-  const db = client.db('college_management')
-  return db.collection<Event>('events')
-}
-
+// Create a placeholder for event participations (can be added later if needed)
 export async function getEventParticipations() {
-  const client = await clientPromise
-  const db = client.db('college_management')
-  return db.collection<EventParticipation>('event_participations')
+  // For now, return the events collection as participations can be stored as part of events
+  return getEvents();
 }
-
-export async function getWinners() {
-  const client = await clientPromise
-  const db = client.db('college_management')
-  return db.collection<Winner>('winners')
-} 

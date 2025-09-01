@@ -1,0 +1,15 @@
+{
+  "title": "Programming Workshop",
+  "eventDate": "2024-11-20T00:00:00.000Z",
+  "location": "Computer Lab 1",
+  "chiefGuest": "Prof. John Code",
+  "fundSpent": 5000,
+  "description": "Hands-on programming workshop covering latest technologies.",
+  "eventType": "Workshop",
+  "status": "completed",
+  "isCompetition": false,
+  "participants": [],
+  "id": "37e933f8-34e0-4319-a28c-7a844b582ecb",
+  "createdAt": "2025-09-01T18:41:56.436Z",
+  "updatedAt": "2025-09-01T18:41:56.436Z"
+}

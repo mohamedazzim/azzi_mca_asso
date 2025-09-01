@@ -10,25 +10,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Username and password are required" }, { status: 400 })
     }
 
-    const usersCollection = await getUsers()
-    const user = await usersCollection.findOne({ username })
+    const usersStorage = await getUsers()
+    const user = await usersStorage.findUser(username)
 
     if (!user) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
     }
 
     // Verify password
-    const isValidPassword = await bcrypt.compare(password, user.passwordHash)
+    const isValidPassword = await bcrypt.compare(password, user.password)
     if (!isValidPassword) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
     }
 
     // Create session data
     const sessionData = {
-      userId: user._id,
+      userId: user.username, // Use username as userId for local storage
       username: user.username,
       role: user.role,
-      fullName: user.fullName,
+      fullName: user.fullName || user.username,
     }
 
     const response = NextResponse.json({
@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
 
     return response
   } catch (error) {
+    console.error("Login error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

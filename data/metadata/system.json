@@ -1,0 +1,9 @@
+{
+  "systemInfo": {
+    "version": "1.0.0",
+    "migratedFrom": "MongoDB + Cloudinary",
+    "migratedAt": "2025-09-01T18:41:56.438Z",
+    "totalStudents": 5,
+    "totalEvents": 5
+  }
+}

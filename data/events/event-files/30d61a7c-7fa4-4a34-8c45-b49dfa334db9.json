@@ -1,0 +1,15 @@
+{
+  "title": "Coding Competition",
+  "eventDate": "2025-03-10T00:00:00.000Z",
+  "location": "Computer Lab 2",
+  "chiefGuest": "CEO Tech Solutions",
+  "fundSpent": 10000,
+  "description": "Inter-college coding competition with prizes for winners.",
+  "eventType": "Competition",
+  "status": "upcoming",
+  "isCompetition": true,
+  "participants": [],
+  "id": "30d61a7c-7fa4-4a34-8c45-b49dfa334db9",
+  "createdAt": "2025-09-01T18:41:56.437Z",
+  "updatedAt": "2025-09-01T18:41:56.437Z"
+}

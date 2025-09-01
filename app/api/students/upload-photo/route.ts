@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getStudents } from "@/lib/db"
-import { ObjectId } from "mongodb"
+import { StudentStorage } from "@/lib/local-storage"
 
 console.log('UPLOAD API CALLED') 
 export async function POST(request: NextRequest) {
@@ -30,7 +29,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Student ID is required" }, { status: 400 })
     }
 
-    if (!ObjectId.isValid(studentId)) {
+    // Validate student ID (no longer using ObjectId)
+    if (!studentId || studentId.length < 1) {
       return NextResponse.json({ error: "Invalid student ID format" }, { status: 400 })
     }
 
@@ -50,74 +50,29 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes)
     console.log('Photo upload: received file', photo.name, 'type', photo.type, 'size', buffer.length)
 
-    // Store in MongoDB
-    const studentsCollection = await getStudents()
-    
-    // Try updating with ObjectId
-    let result = await studentsCollection.updateOne(
-      { _id: new ObjectId(studentId) },
-      { 
-        $set: { 
-          photoData: buffer,
-          photoContentType: photo.type,
-          photoFileName: photo.name,
-          updatedAt: new Date()
-        } 
-      }
-    )
-
-    // If not matched, try with string _id
-    if (result.matchedCount === 0) {
-      result = await studentsCollection.updateOne(
-        { _id: studentId },
-        { 
-          $set: { 
-            photoData: buffer,
-            photoContentType: photo.type,
-            photoFileName: photo.name,
-            updatedAt: new Date()
-          } 
-        }
-      )
-    }
-
-    console.log('Photo upload: studentId', studentId, 'matchedCount', result.matchedCount)
-
-    // Fetch the student after update and log photoData presence and size
-    let updatedStudent = await studentsCollection.findOne({ _id: new ObjectId(studentId) })
-    if (!updatedStudent) {
-      updatedStudent = await studentsCollection.findOne({ _id: studentId })
-    }
-    if (updatedStudent && updatedStudent.photoData) {
-      console.log('Photo upload: photoData present, size', updatedStudent.photoData.length)
-    } else {
-      console.log('Photo upload: photoData NOT present after update')
-    }
-
-    // After update, log the updated student document
-    if (updatedStudent) {
-      console.log('Photo upload: updated student', {
-        _id: updatedStudent._id,
-        photoDataType: typeof updatedStudent.photoData,
-        photoDataLength: updatedStudent.photoData ? updatedStudent.photoData.length : null,
-        photoContentType: updatedStudent.photoContentType,
-        photoFileName: updatedStudent.photoFileName
-      })
-    } else {
-      console.log('Photo upload: student NOT FOUND after update')
-    }
-
-    if (result.matchedCount === 0) {
+    // Check if student exists
+    const student = await StudentStorage.getStudent(studentId)
+    if (!student) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 })
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: "Photo uploaded and stored in database successfully",
-      photoUrl: `/api/students/${studentId}/photo`
-    })
+    // Save photo to local storage
+    try {
+      const photoPath = await StudentStorage.saveStudentPhoto(studentId, buffer, photo.type, photo.name)
+      console.log('Photo upload: saved to path', photoPath)
+
+      return NextResponse.json({ 
+        success: true, 
+        message: "Photo uploaded and stored locally successfully",
+        photoUrl: `/api/students/${studentId}/photo`
+      })
+    } catch (saveError) {
+      console.error('Photo upload: save error', saveError)
+      return NextResponse.json({ error: "Failed to save photo" }, { status: 500 })
+    }
 
   } catch (error) {
+    console.error('Photo upload: general error', error)
     return NextResponse.json({ error: "Failed to upload photo" }, { status: 500 })
   }
-} 
+}

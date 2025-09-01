@@ -1,0 +1,15 @@
+{
+  "title": "Cultural Evening",
+  "eventDate": "2025-02-14T00:00:00.000Z",
+  "location": "College Ground",
+  "chiefGuest": "Ms. Art Director",
+  "fundSpent": 15000,
+  "description": "Cultural program featuring music, dance, and drama performances.",
+  "eventType": "Cultural",
+  "status": "upcoming",
+  "isCompetition": false,
+  "participants": [],
+  "id": "124969a5-4a95-4149-8301-badeed1b6288",
+  "createdAt": "2025-09-01T18:41:56.436Z",
+  "updatedAt": "2025-09-01T18:41:56.436Z"
+}
