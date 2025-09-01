@@ -366,7 +366,7 @@ function AdminDashboardContent() {
           <div className="w-10 border-b border-blue-200 mb-1"></div>
           <div className="flex flex-col md:flex-row items-center gap-4 w-full">
             <Image 
-              src="/developer-photo.svg" 
+              src="/developer-photo.png" 
               alt="Mohamed Azzim J" 
               width={64}
               height={64}

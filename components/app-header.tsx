@@ -21,7 +21,7 @@ export default function AppHeader() {
       <div className="flex items-center justify-center gap-40 px-4 py-2 max-w-7xl mx-auto">
         {/* Left Logo */}
         <div className="flex-shrink-0">
-          <Image src="/college-logo.svg" alt="College Logo" width={60} height={60} className="object-contain" />
+          <Image src="/college-logo.png" alt="College Logo" width={60} height={60} className="object-contain" />
         </div>
         {/* Center Text */}
         <div className="flex flex-col items-center text-center">
@@ -30,7 +30,7 @@ export default function AppHeader() {
         </div>
         {/* Right Logo */}
         <div className="flex-shrink-0">
-          <Image src="/department-logo.svg" alt="Department Logo" width={60} height={60} className="object-contain" />
+          <Image src="/department-logo.png" alt="Department Logo" width={60} height={60} className="object-contain" />
         </div>
       </div>
       {/* Navigation Bar */}

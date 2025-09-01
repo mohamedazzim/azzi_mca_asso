@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: 'MCA Department Association Activity Management System',
   generator: 'Next.js',
   icons: {
-    icon: '/favicon.svg',
+    icon: '/favicon.png',
   },
 }
 
