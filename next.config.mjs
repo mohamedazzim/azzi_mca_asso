@@ -21,6 +21,10 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Configure server to bind to all interfaces for Replit compatibility
+  experimental: {
+    serverComponentsExternalPackages: ['canvas']
+  },
 };
 
 export default nextConfig;
