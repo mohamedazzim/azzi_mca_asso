@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
+import { EventStorage, MetadataStorage } from "@/lib/local-storage";
+import { randomUUID } from "crypto";
 
 export const runtime = "nodejs";
 
@@ -17,18 +18,20 @@ export async function POST(req: NextRequest) {
       uploadedAt: new Date(),
     };
 
-    const client = await clientPromise;
-    const db = client.db("college_management");
-    const filesCollection = db.collection("attendance_uploads");
-
-    const result = await filesCollection.insertOne({
-      ...metadata,
-      file: buffer,
-    });
+    const fileId = randomUUID();
+    
+    // Save file to local storage
+    const filePath = await EventStorage.saveEventFile(fileId, buffer, 'attendance', file.name);
+    
+    // Save metadata to local storage
+    const attendanceFiles = await MetadataStorage.getMetadata('attendance_uploads') || [];
+    const fileRecord = { ...metadata, _id: fileId, filePath };
+    attendanceFiles.push(fileRecord);
+    await MetadataStorage.saveMetadata('attendance_uploads', attendanceFiles);
 
     return NextResponse.json({
       message: "File uploaded successfully!",
-      fileId: result.insertedId,
+      fileId: fileId,
       ...metadata,
     });
   } catch (err: any) {

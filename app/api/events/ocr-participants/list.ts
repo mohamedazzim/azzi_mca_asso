@@ -1,22 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
+import { MetadataStorage } from "@/lib/local-storage";
 
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
   try {
-    const client = await clientPromise;
-    const db = client.db("college_management");
-    const filesCollection = db.collection("attendance_uploads");
-
-    // Exclude the file buffer from the result
-    const files = await filesCollection.find({}, {
-      projection: { file: 0 }
-    }).sort({ uploadedAt: -1 }).toArray();
+    // Get file metadata from local storage (exclude file paths for security)
+    const attendanceFiles = await MetadataStorage.getMetadata('attendance_uploads') || [];
+    
+    // Remove file paths from the response for security
+    const files = attendanceFiles.map(({ filePath, ...fileInfo }: any) => fileInfo)
+                                .sort((a: any, b: any) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
 
     return NextResponse.json({ files });
   } catch (err: any) {
     console.error("LIST FILES ERROR:", err);
     return NextResponse.json({ error: err.message || "Internal Server Error" }, { status: 500 });
   }
-} 
+}
