@@ -1,5 +1,6 @@
 'use client';
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -19,8 +20,8 @@ export default function AppHeader() {
       {/* Replace the header row with a centered flex row and gap */}
       <div className="flex items-center justify-center gap-40 px-4 py-2 max-w-7xl mx-auto">
         {/* Left Logo */}
-        <div className="flex-shrink-0 w-[60px] h-[60px] bg-blue-100 rounded-lg flex items-center justify-center">
-          <span className="text-2xl font-bold text-blue-600">BHC</span>
+        <div className="flex-shrink-0">
+          <Image src="/college-logo.svg" alt="College Logo" width={60} height={60} className="object-contain" />
         </div>
         {/* Center Text */}
         <div className="flex flex-col items-center text-center">
@@ -28,8 +29,8 @@ export default function AppHeader() {
           <span className="text-sm text-gray-600">Students Management Portal</span>
         </div>
         {/* Right Logo */}
-        <div className="flex-shrink-0 w-[60px] h-[60px] bg-green-100 rounded-lg flex items-center justify-center">
-          <span className="text-xl font-bold text-green-600">MCA</span>
+        <div className="flex-shrink-0">
+          <Image src="/department-logo.svg" alt="Department Logo" width={60} height={60} className="object-contain" />
         </div>
       </div>
       {/* Navigation Bar */}

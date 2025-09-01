@@ -24,10 +24,10 @@ Preferred communication style: Simple, everyday language.
 - **Image Processing**: Photo upload and management with validation and secure storage
 
 ## Data Storage Solutions
-- **Primary Database**: MongoDB for all application data including users, students, events, and analytics
-- **Photo Storage**: Choice between MongoDB GridFS (current) and Cloudinary (configured but optional)
+- **Primary Database**: Local JSON files for all application data including users, students, events, and analytics
+- **Photo Storage**: Local file system storage in organized folder structure by batch/event
 - **Session Storage**: Browser localStorage for user session management with automatic timeout
-- **File Upload**: Temporary file processing for PDF imports with automatic cleanup
+- **File Upload**: Local file processing and storage with organized directory structure
 
 ## Authentication and Authorization
 - **Authentication Method**: Username/password authentication with bcryptjs hashing

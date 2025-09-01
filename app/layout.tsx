@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: 'College Management System',
   description: 'MCA Department Association Activity Management System',
   generator: 'Next.js',
+  icons: {
+    icon: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

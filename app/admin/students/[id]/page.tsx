@@ -175,7 +175,7 @@ function StudentDetailPageContent() {
             <Card>
               <CardHeader className="text-center">
                 <Avatar className="h-24 w-24 mx-auto mb-4">
-                  <AvatarImage src={`/api/students/${student.id}/photo` || "https://res.cloudinary.com/dgxjdpnze/raw/upload/v1752423664/static/placeholders/1752423659099-placeholder.svg"} alt={student.name} />
+                  <AvatarImage src={`/api/students/${student.id}/photo`} alt={student.name} />
                   <AvatarFallback className="text-lg">
                     {student.name
                       .split(" ")

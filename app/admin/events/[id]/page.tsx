@@ -129,7 +129,7 @@ export default function EventDetailsPage() {
                   return (
                     <div key={idx} className="flex flex-col items-center p-4 bg-gray-50 rounded-lg border w-48">
                       <Avatar className="h-16 w-16 mb-2">
-                        <AvatarImage src={isUnknown ? "https://res.cloudinary.com/dgxjdpnze/raw/upload/v1752423664/static/placeholders/1752423659099-placeholder.svg" : student?.photo} alt={student?.name || 'Unknown Student'} />
+                        <AvatarImage src={isUnknown ? undefined : student?.photo} alt={student?.name || 'Unknown Student'} />
                         <AvatarFallback>{isUnknown ? '?' : (student?.name ? student.name.split(' ').map((n: string) => n[0]).join('') : '?')}</AvatarFallback>
                       </Avatar>
                       <div className="font-semibold text-center mb-1">{isUnknown ? 'Unknown Student' : student.name}</div>

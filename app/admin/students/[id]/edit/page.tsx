@@ -30,7 +30,7 @@ const PhotoUpload = memo<{
   <div className="flex items-center space-x-6">
     <Avatar className="h-24 w-24">
       <AvatarImage 
-        src={previewUrl || formData.photoUrl || "https://res.cloudinary.com/dgxjdpnze/raw/upload/v1752423664/static/placeholders/1752423659099-placeholder.svg"} 
+        src={previewUrl || formData.photoUrl || undefined} 
       />
       <AvatarFallback className="text-lg">
         {formData.name

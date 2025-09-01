@@ -111,7 +111,7 @@ const TopPerformerCard = memo<TopPerformerProps>(({ student }) => (
     <div className="flex flex-col items-center p-2 cursor-pointer hover:bg-gray-50 rounded">
       <Avatar className="h-12 w-12 mb-1">
         <AvatarImage 
-          src={/^[a-f0-9]{24}$/i.test(student.name) ? "https://res.cloudinary.com/dgxjdpnze/raw/upload/v1752423664/static/placeholders/1752423659099-placeholder.svg" : student.photo} 
+          src={/^[a-f0-9]{24}$/i.test(student.name) ? undefined : student.photo} 
           alt={student.name} 
         />
         <AvatarFallback>
@@ -366,7 +366,7 @@ function AdminDashboardContent() {
           <div className="w-10 border-b border-blue-200 mb-1"></div>
           <div className="flex flex-col md:flex-row items-center gap-4 w-full">
             <Image 
-              src="https://res.cloudinary.com/dgxjdpnze/image/upload/v1752422042/static/footer-photos/1752422035429-IMG_1537.JPG.jpg" 
+              src="/developer-photo.svg" 
               alt="Mohamed Azzim J" 
               width={64}
               height={64}
