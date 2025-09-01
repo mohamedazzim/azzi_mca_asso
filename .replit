@@ -1,14 +1,31 @@
-language = "nodejs"
+modules = ["nodejs-18", "web", "bash"]
 run = "npm run dev"
-entrypoint = "npm run dev"
-
-[env]
-# Add your MongoDB connection string here (update in Replit secrets)
-MONGODB_URI = "mongodb+srv://mohamed_azzim:Azzim%4003@clusterlearning.pjv5awa.mongodb.net/college_management?retryWrites=true&w=majority&appName=ClusterLearning"
 
 [nix]
-# Use Node.js 18 for compatibility
-pkgs = ["nodejs-18_x"]
+channel = "stable-25_05"
+packages = ["tree"]
 
-# Optionally include more system dependencies if needed
-# pkgs = ["nodejs-18_x", "imagemagick", "tesseract"]
+[agent]
+expertMode = true
+
+[workflows]
+runButton = "Next.js App"
+
+[[workflows.workflow]]
+name = "Next.js App"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev -- -p 8080"
+waitForPort = 8080
+
+[[ports]]
+localPort = 8080
+externalPort = 80
+
+[deployment]
+run = ["npm", "run", "start", "--", "-p", "8080"]
+deploymentTarget = "autoscale"
+build = ["npm", "run", "build"]
