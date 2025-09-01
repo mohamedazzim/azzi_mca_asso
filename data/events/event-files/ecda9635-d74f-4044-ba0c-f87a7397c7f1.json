@@ -1,0 +1,15 @@
+{
+  "title": "Annual Tech Fest 2024",
+  "eventDate": "2024-10-15T00:00:00.000Z",
+  "location": "Main Auditorium",
+  "chiefGuest": "Dr. Sarah Tech",
+  "fundSpent": 25000,
+  "description": "Annual technology festival featuring competitions, workshops, and exhibitions.",
+  "eventType": "Festival",
+  "status": "completed",
+  "isCompetition": true,
+  "participants": [],
+  "id": "ecda9635-d74f-4044-ba0c-f87a7397c7f1",
+  "createdAt": "2025-09-01T19:23:31.023Z",
+  "updatedAt": "2025-09-01T19:23:31.023Z"
+}
