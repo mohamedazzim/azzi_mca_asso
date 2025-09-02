@@ -19,10 +19,9 @@ const LoginForm = memo<{
   handleLogin: (e: React.FormEvent) => void;
   error: string;
 }>(({ credentials, setCredentials, loading, showPassword, setShowPassword, handleLogin, error }) => (
-  <form onSubmit={handleLogin} className="space-y-6">
-    <div className="space-y-3">
-      <Label htmlFor="username" className="flex items-center gap-2 text-gray-700 font-semibold">
-        <User className="h-4 w-4 text-indigo-600" />
+  <form onSubmit={handleLogin} className="space-y-4">
+    <div className="space-y-2">
+      <Label htmlFor="username" className="text-sm font-medium text-gray-700">
         Username
       </Label>
       <Input
@@ -30,16 +29,15 @@ const LoginForm = memo<{
         value={credentials.username}
         onChange={e => setCredentials({ ...credentials, username: e.target.value })}
         placeholder="Enter your username"
-        className="h-14 text-lg border-2 border-gray-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 rounded-xl transition-all duration-200 bg-gray-50/50 focus:bg-white"
+        className="h-12 px-4 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg transition-all duration-200 bg-white"
         autoFocus
         disabled={loading}
         required
       />
     </div>
     
-    <div className="space-y-3">
-      <Label htmlFor="password" className="flex items-center gap-2 text-gray-700 font-semibold">
-        <Lock className="h-4 w-4 text-indigo-600" />
+    <div className="space-y-2">
+      <Label htmlFor="password" className="text-sm font-medium text-gray-700">
         Password
       </Label>
       <div className="relative">
@@ -49,7 +47,7 @@ const LoginForm = memo<{
           value={credentials.password}
           onChange={e => setCredentials({ ...credentials, password: e.target.value })}
           placeholder="Enter your password"
-          className="h-14 text-lg pr-14 border-2 border-gray-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 rounded-xl transition-all duration-200 bg-gray-50/50 focus:bg-white"
+          className="h-12 px-4 pr-12 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg transition-all duration-200 bg-white"
           disabled={loading}
           required
         />
@@ -57,7 +55,7 @@ const LoginForm = memo<{
           type="button"
           variant="ghost"
           size="sm"
-          className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 p-0 text-gray-400 hover:text-gray-600 transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
           onClick={() => setShowPassword(!showPassword)}
           disabled={loading}
         >
@@ -67,29 +65,23 @@ const LoginForm = memo<{
     </div>
     
     {error && (
-      <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 rounded-xl shadow-sm">
-        <p className="text-red-700 text-sm font-semibold flex items-center gap-2">
-          <Shield className="h-4 w-4" />
-          {error}
-        </p>
+      <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+        <p className="text-red-600 text-sm">{error}</p>
       </div>
     )}
     
     <Button
       type="submit"
-      className="w-full h-14 text-lg font-bold bg-gradient-to-r from-indigo-600 via-sky-600 to-emerald-600 hover:from-indigo-700 hover:via-sky-700 hover:to-emerald-700 text-white border-0 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+      className="w-full h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
       disabled={loading}
     >
       {loading ? (
         <>
-          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Signing In...
         </>
       ) : (
-        <>
-          <Shield className="mr-2 h-5 w-5" />
-          Sign In
-        </>
+        "Sign In"
       )}
     </Button>
   </form>
@@ -119,24 +111,23 @@ const DemoCredentials = memo(() => (
 
 // Skeleton loader
 const LoginSkeleton = () => (
-  <div className="w-full max-w-lg p-8 bg-white/95 rounded-3xl shadow-2xl border border-white/50 backdrop-blur-xl">
-    <div className="flex flex-col items-center mb-8">
-      <div className="w-24 h-24 bg-gray-200 rounded-full mb-6 animate-pulse"></div>
-      <div className="h-8 bg-gray-200 rounded w-48 mb-2 animate-pulse"></div>
-      <div className="h-4 bg-gray-200 rounded w-64 mb-4 animate-pulse"></div>
-      <div className="w-24 h-1 bg-gray-200 rounded-full animate-pulse"></div>
+  <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-lg border border-gray-100">
+    <div className="flex flex-col items-center mb-10">
+      <div className="w-24 h-24 bg-gray-200 mb-6 animate-pulse"></div>
+      <div className="h-6 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+      <div className="h-4 bg-gray-200 rounded w-48 animate-pulse"></div>
     </div>
     
-    <div className="space-y-6">
-      <div className="space-y-3">
+    <div className="space-y-4">
+      <div className="space-y-2">
         <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
-        <div className="h-14 bg-gray-200 rounded-xl animate-pulse"></div>
+        <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
       </div>
-      <div className="space-y-3">
+      <div className="space-y-2">
         <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
-        <div className="h-14 bg-gray-200 rounded-xl animate-pulse"></div>
+        <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
       </div>
-      <div className="h-14 bg-gray-200 rounded-xl animate-pulse"></div>
+      <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
     </div>
   </div>
 )
@@ -226,33 +217,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 via-sky-400 to-emerald-400 animate-gradient-x overflow-hidden">
-      {/* Animated background blobs */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute left-1/2 top-1/3 w-[600px] h-[600px] bg-indigo-400 opacity-30 rounded-full blur-3xl animate-blob1" />
-        <div className="absolute right-1/4 top-1/4 w-[400px] h-[400px] bg-sky-300 opacity-30 rounded-full blur-2xl animate-blob2" />
-        <div className="absolute left-1/4 bottom-0 w-[500px] h-[500px] bg-emerald-300 opacity-30 rounded-full blur-2xl animate-blob3" />
-      </div>
-      
-      <div className="relative z-10 w-full max-w-lg p-8 bg-white/95 rounded-3xl shadow-2xl border border-white/50 backdrop-blur-xl animate-fadein">
-        <div className="flex flex-col items-center mb-8">
-          <div className="relative mb-6 animate-pop">
-            <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500 via-sky-400 to-emerald-400 rounded-full blur-lg opacity-40 scale-110"></div>
-            <div className="relative bg-white p-4 rounded-full shadow-xl border-4 border-white/60">
-              <Image 
-                src="/department-logo.png" 
-                alt="MCA Department Logo" 
-                width={80} 
-                height={80}
-                className="w-20 h-20 object-contain"
-                priority
-              />
-            </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-lg border border-gray-100">
+        <div className="flex flex-col items-center mb-10">
+          <div className="mb-6">
+            <Image 
+              src="/department-logo.png" 
+              alt="MCA Department Logo" 
+              width={100} 
+              height={100}
+              className="w-24 h-24 object-contain"
+              priority
+            />
           </div>
           <div className="text-center">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 via-sky-600 to-emerald-600 bg-clip-text text-transparent mb-2">MCA Department</h1>
-            <p className="text-gray-600 text-sm font-medium mb-1">Association Activity Management System</p>
-            <div className="w-24 h-1 bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-full mx-auto"></div>
+            <h1 className="text-2xl font-bold text-gray-800 mb-2">Welcome Back</h1>
+            <p className="text-gray-500 text-sm">Sign in to MCA Department Portal</p>
           </div>
         </div>
         
@@ -265,57 +245,7 @@ export default function LoginPage() {
           handleLogin={handleLogin}
           error={error}
         />
-        
-        
       </div>
-      
-      {/* Animations */}
-      <style>{`
-        .animate-gradient-x {
-          background-size: 200% 200%;
-          animation: gradient-x 8s ease-in-out infinite;
-        }
-        @keyframes gradient-x {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-        .animate-fadein {
-          animation: fadein 0.8s cubic-bezier(.4,2,.6,1) both;
-        }
-        @keyframes fadein {
-          0% { opacity: 0; transform: translateY(40px) scale(0.95); }
-          100% { opacity: 1; transform: none; }
-        }
-        .animate-pop {
-          animation: pop 0.7s cubic-bezier(.4,2,.6,1) both;
-        }
-        @keyframes pop {
-          0% { opacity: 0; transform: scale(0.7); }
-          80% { opacity: 1; transform: scale(1.1); }
-          100% { opacity: 1; transform: scale(1); }
-        }
-        .animate-blob1 {
-          animation: blob1 12s ease-in-out infinite alternate;
-        }
-        .animate-blob2 {
-          animation: blob2 14s ease-in-out infinite alternate;
-        }
-        .animate-blob3 {
-          animation: blob3 16s ease-in-out infinite alternate;
-        }
-        @keyframes blob1 {
-          0% { transform: translate(-50%, 0) scale(1); }
-          100% { transform: translate(-60%, -10%) scale(1.1); }
-        }
-        @keyframes blob2 {
-          0% { transform: translate(0, 0) scale(1); }
-          100% { transform: translate(10%, 10%) scale(1.15); }
-        }
-        @keyframes blob3 {
-          0% { transform: translate(0, 0) scale(1); }
-          100% { transform: translate(-10%, 10%) scale(1.08); }
-        }
-      `}</style>
     </div>
   )
 }
