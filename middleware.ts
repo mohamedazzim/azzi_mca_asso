@@ -10,9 +10,28 @@ export function middleware(request: NextRequest) {
   }
 
   // Public routes that don't require authentication
-  const publicRoutes = ["/", "/login"]
+  const publicRoutes = ["/login"]
   if (publicRoutes.includes(pathname)) {
     return NextResponse.next()
+  }
+
+  // Handle root route - redirect based on authentication
+  if (pathname === "/") {
+    const sessionCookie = request.cookies.get("session")?.value
+    let user: { role?: string } | null = null
+    if (sessionCookie) {
+      try {
+        user = JSON.parse(sessionCookie)
+      } catch {
+        user = null
+      }
+    }
+    
+    if (user) {
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url))
+    } else {
+      return NextResponse.redirect(new URL("/login", request.url))
+    }
   }
 
   // Session validation for protected routes
