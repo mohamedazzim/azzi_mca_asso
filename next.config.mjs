@@ -17,6 +17,20 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['canvas']
   },
+  // Allow all hosts for Replit proxy compatibility
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
+      },
+    ]
+  },
 };
 
 export default nextConfig;

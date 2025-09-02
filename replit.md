@@ -1,6 +1,6 @@
 # Overview
 
-The College Management System is a comprehensive web application designed for managing students, events, analytics, and activities within an MCA department. The system provides a modern, production-ready platform with role-based access control, photo management, event tracking, and detailed analytics reporting. Built with Next.js 14, TypeScript, and MongoDB, it offers features like bulk PDF import for student data, event management with participant tracking, comprehensive analytics dashboards, and secure user authentication.
+The College Management System is a comprehensive web application designed for managing students, events, analytics, and activities within an MCA department. The system provides a modern, production-ready platform with role-based access control, photo management, event tracking, and detailed analytics reporting. Built with Next.js 14, TypeScript, and local file storage, it offers features like bulk PDF import for student data, event management with participant tracking, comprehensive analytics dashboards, and secure user authentication. Now fully configured for Replit environment with proper host bindings and deployment settings.
 
 # User Preferences
 
