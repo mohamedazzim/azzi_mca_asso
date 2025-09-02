@@ -92,18 +92,18 @@ const DemoCredentials = memo(() => (
     <CardHeader className="pb-3">
       <CardTitle className="text-lg flex items-center gap-2">
         <Shield className="h-5 w-5 text-blue-600" />
-        Demo Credentials
+        Login Credentials
       </CardTitle>
-      <CardDescription>Use these credentials to test the system</CardDescription>
+      <CardDescription>Use these credentials to access the system</CardDescription>
     </CardHeader>
     <CardContent className="space-y-2 text-sm">
       <div className="flex items-center justify-between p-2 bg-white rounded border">
         <span className="font-medium text-blue-600">Admin:</span>
-        <span className="font-mono">admin / admin123</span>
+        <span className="font-mono text-xs">thams.ca@bhc.edu.in / Azzi@2026</span>
       </div>
       <div className="flex items-center justify-between p-2 bg-white rounded border">
         <span className="font-medium text-green-600">Staff:</span>
-        <span className="font-mono">staff / staff123</span>
+        <span className="font-mono text-xs">staff@bhc.edu.in / Staff@MCA</span>
       </div>
     </CardContent>
   </Card>
@@ -202,7 +202,7 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.error('Login error:', error)
-      setError("Network error. Please try again.")
+      setError(`Network error: ${error instanceof Error ? error.message : 'Please try again.'}`)
     } finally {
       setLoading(false)
     }
@@ -245,6 +245,10 @@ export default function LoginPage() {
           handleLogin={handleLogin}
           error={error}
         />
+        
+        <div className="mt-6">
+          <DemoCredentials />
+        </div>
       </div>
     </div>
   )
