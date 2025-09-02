@@ -33,24 +33,24 @@ class UserStorage {
   
   // Initialize with admin and staff users
   static initialize() {
+    // Clear existing users and reinitialize
+    this.users.clear();
+    
     // Admin account
-    if (!this.users.has('thams.ca@bhc.edu.in')) {
-      this.users.set('thams.ca@bhc.edu.in', {
-        username: 'thams.ca@bhc.edu.in',
-        password: '$2a$10$bFtIgB2Kn75WzGZ/0HC0aeb.ig2MwmJS/rJW4fCIyMYDLFR0TOQdG', // Azzi@2026
-        role: 'admin',
-        fullName: 'Administrator'
-      });
-    }
+    this.users.set('thams.ca@bhc.edu.in', {
+      username: 'thams.ca@bhc.edu.in',
+      password: '$2a$10$0/3M5830CKiGOOuYWC85Ee75PDye7IXN4RDjSO5Fk9RhQjFzjQvWS', // Azzi@2026
+      role: 'admin',
+      fullName: 'Administrator'
+    });
+    
     // Staff account
-    if (!this.users.has('staff@bhc.edu.in')) {
-      this.users.set('staff@bhc.edu.in', {
-        username: 'staff@bhc.edu.in',
-        password: '$2a$10$P.Ga0jtN/eE1SKz.l1DTqOHTG4zYHGHi/P7wtsEAwoJ26D2616H0K', // Staff@MCA
-        role: 'staff',
-        fullName: 'Staff User'
-      });
-    }
+    this.users.set('staff@bhc.edu.in', {
+      username: 'staff@bhc.edu.in',
+      password: '$2a$10$bzbw/gY97ACFfdgBVH05EeT16/fbCQMc3.lEWYwFGYcI5xq8FjYQm', // Staff@MCA
+      role: 'staff',
+      fullName: 'Staff User'
+    });
   }
 }
 
