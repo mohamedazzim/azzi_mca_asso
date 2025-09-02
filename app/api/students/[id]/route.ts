@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getStudents } from "@/lib/db"
 import { ObjectId } from "mongodb"
+import { StudentStorage } from "@/lib/local-storage"
 
 export async function GET(
   request: NextRequest,
@@ -8,16 +9,16 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    if (!ObjectId.isValid(id)) {
+    if (!id || id.length < 1) {
       return NextResponse.json({ error: "Invalid student ID" }, { status: 400 })
     }
-    const studentsCollection = await getStudents()
-    const student = await studentsCollection.findOne({ _id: new ObjectId(id) })
+    
+    const student = await StudentStorage.getStudent(id)
     if (!student) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 })
     }
     return NextResponse.json({
-      id: student._id?.toString(),
+      id: student.id,
       name: student.name,
       rollNumber: student.rollNumber,
       email: student.email,
@@ -32,7 +33,7 @@ export async function GET(
       guardianPhone: student.guardianPhone,
       address: student.address,
       hostellerStatus: student.hostellerStatus,
-      photoUrl: student.photoData ? `/api/students/${student._id}/photo` : student.photoUrl,
+      photoUrl: student.photoPath ? `/api/students/${student.id}/photo` : student.photoUrl,
       isActive: student.isActive,
       createdAt: student.createdAt,
       updatedAt: student.updatedAt,
@@ -56,11 +57,10 @@ export async function PUT(
   try {
     const { id } = await params
     const updateData = await request.json()
-    if (!ObjectId.isValid(id)) {
+    if (!id || id.length < 1) {
       return NextResponse.json({ error: "Invalid student ID" }, { status: 400 })
     }
-    const studentsCollection = await getStudents()
-    const existingStudent = await studentsCollection.findOne({ _id: new ObjectId(id) })
+    const existingStudent = await StudentStorage.getStudent(id)
     if (!existingStudent) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 })
     }
@@ -77,13 +77,15 @@ export async function PUT(
       }
     }
     if (updateData.rollNumber && updateData.rollNumber !== existingStudent.rollNumber) {
-      const duplicateRoll = await studentsCollection.findOne({ rollNumber: updateData.rollNumber })
+      const allStudents = await StudentStorage.getAllStudents()
+      const duplicateRoll = allStudents.find(s => s.rollNumber === updateData.rollNumber && s.id !== id)
       if (duplicateRoll) {
         return NextResponse.json({ error: "Roll number already exists" }, { status: 400 })
       }
     }
     if (updateData.email && updateData.email !== existingStudent.email) {
-      const duplicateEmail = await studentsCollection.findOne({ email: updateData.email })
+      const allStudents = await StudentStorage.getAllStudents()
+      const duplicateEmail = allStudents.find(s => s.email === updateData.email && s.id !== id)
       if (duplicateEmail) {
         return NextResponse.json({ error: "Email already exists" }, { status: 400 })
       }
@@ -106,12 +108,9 @@ export async function PUT(
     if (updateData.hostellerStatus) updateFields.hostellerStatus = updateData.hostellerStatus;
     if (updateData.isActive !== undefined) updateFields.isActive = updateData.isActive
     if (updateData.section) updateFields.section = updateData.section
-    // Never unset or overwrite photoData, photoContentType, or photoFileName here
-    const result = await studentsCollection.updateOne(
-      { _id: new ObjectId(id) },
-      { $set: updateFields }
-    )
-    if (result.matchedCount === 0) {
+    // Update student using local storage
+    const success = await StudentStorage.updateStudent(id, updateFields)
+    if (!success) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 })
     }
     return NextResponse.json({ success: true, message: "Student updated successfully" })
@@ -133,14 +132,13 @@ export async function DELETE(
   try {
     const { id } = await params
     
-    if (!ObjectId.isValid(id)) {
+    if (!id || id.length < 1) {
       return NextResponse.json({ error: "Invalid student ID" }, { status: 400 })
     }
     
-    const studentsCollection = await getStudents()
-    const result = await studentsCollection.deleteOne({ _id: new ObjectId(id) })
+    const success = await StudentStorage.deleteStudent(id)
     
-    if (result.deletedCount === 0) {
+    if (!success) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 })
     }
     
@@ -149,4 +147,4 @@ export async function DELETE(
     console.error("Error deleting student:", error)
     return NextResponse.json({ error: "Failed to delete student" }, { status: 500 })
   }
-} 
+}

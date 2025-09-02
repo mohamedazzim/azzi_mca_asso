@@ -128,9 +128,14 @@ export class StudentStorage {
           await fs.unlink(studentFile);
           
           // Also delete associated photo if exists
-          const photoPath = path.join(STUDENTS_DIR, 'photos', `${id}.jpg`);
-          if (existsSync(photoPath)) {
-            await fs.unlink(photoPath);
+          const student = JSON.parse(await fs.readFile(studentFile, 'utf-8'));
+          if (student.photoPath && existsSync(student.photoPath)) {
+            await fs.unlink(student.photoPath);
+          }
+          // Also try to delete by roll number for legacy compatibility
+          const legacyPhotoPath = path.join(STUDENTS_DIR, 'photos', `${id}.jpg`);
+          if (existsSync(legacyPhotoPath)) {
+            await fs.unlink(legacyPhotoPath);
           }
           
           return true;
@@ -187,20 +192,24 @@ export class StudentStorage {
 
   static async saveStudentPhoto(studentId: string, photoBuffer: Buffer, contentType: string, filename: string): Promise<string> {
     try {
+      const student = await this.getStudent(studentId);
+      if (!student) {
+        throw new Error('Student not found');
+      }
+      
       const extension = path.extname(filename) || '.jpg';
-      const photoPath = path.join(STUDENTS_DIR, 'photos', `${studentId}${extension}`);
+      const batchPath = getBatchPath(student.batchYear || 'unknown');
+      const photoPath = path.join(batchPath, `${student.rollNumber}${extension}`);
       
       await fs.writeFile(photoPath, photoBuffer);
       
       // Update student record with photo info
-      const student = await this.getStudent(studentId);
-      if (student) {
-        await this.updateStudent(studentId, {
-          photoPath: photoPath,
-          photoContentType: contentType,
-          photoFileName: filename
-        });
-      }
+      await this.updateStudent(studentId, {
+        photoPath: photoPath,
+        photoContentType: contentType,
+        photoFileName: filename,
+        photoUrl: `/api/students/${studentId}/photo`
+      });
       
       return photoPath;
     } catch (error) {
