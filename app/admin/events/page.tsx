@@ -226,9 +226,17 @@ function EventsPageContent() {
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={() => onDelete(event.id)}
-                      className="bg-red-600 hover:bg-red-700"
+                      disabled={loading}
+                      className="bg-red-600 hover:bg-red-700 disabled:opacity-50"
                     >
-                      Delete
+                      {loading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Deleting...
+                        </>
+                      ) : (
+                        "Delete"
+                      )}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -302,12 +310,45 @@ function EventsPageContent() {
           <CardContent>
             {loading ? (
               <Table>
-                <TableBody>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={7}>
-                      <div className="h-8 bg-gray-200 animate-pulse rounded w-full" />
-                    </TableCell>
+                    <TableHead><div className="h-4 bg-gray-200 animate-pulse rounded w-24" /></TableHead>
+                    <TableHead><div className="h-4 bg-gray-200 animate-pulse rounded w-28" /></TableHead>
+                    <TableHead><div className="h-4 bg-gray-200 animate-pulse rounded w-20" /></TableHead>
+                    <TableHead><div className="h-4 bg-gray-200 animate-pulse rounded w-16" /></TableHead>
+                    <TableHead><div className="h-4 bg-gray-200 animate-pulse rounded w-16" /></TableHead>
+                    <TableHead><div className="h-4 bg-gray-200 animate-pulse rounded w-20" /></TableHead>
+                    <TableHead><div className="h-4 bg-gray-200 animate-pulse rounded w-20" /></TableHead>
                   </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[...Array(5)].map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="h-4 bg-gray-200 animate-pulse rounded w-32" />
+                          <div className="h-3 bg-gray-200 animate-pulse rounded w-48" />
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="h-4 bg-gray-200 animate-pulse rounded w-20" />
+                          <div className="h-3 bg-gray-200 animate-pulse rounded w-24" />
+                        </div>
+                      </TableCell>
+                      <TableCell><div className="h-4 bg-gray-200 animate-pulse rounded w-24" /></TableCell>
+                      <TableCell><div className="h-4 bg-gray-200 animate-pulse rounded w-16" /></TableCell>
+                      <TableCell><div className="h-6 w-16 bg-gray-200 animate-pulse rounded-full" /></TableCell>
+                      <TableCell><div className="h-6 w-20 bg-gray-200 animate-pulse rounded-full" /></TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <div className="h-8 w-16 bg-gray-200 animate-pulse rounded" />
+                          <div className="h-8 w-16 bg-gray-200 animate-pulse rounded" />
+                          <div className="h-8 w-8 bg-gray-200 animate-pulse rounded" />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             ) : (

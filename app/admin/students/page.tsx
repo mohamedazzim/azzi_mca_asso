@@ -121,9 +121,17 @@ const StudentRow = memo<StudentRowProps>(({ student, selected, onSelect, canEdit
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => deleteStudent(student.id)}
-                  className="bg-red-600 hover:bg-red-700"
+                  disabled={deletingId === student.id}
+                  className="bg-red-600 hover:bg-red-700 disabled:opacity-50"
                 >
-                  Delete
+                  {deletingId === student.id ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -512,8 +520,22 @@ function StudentsPageContent() {
                 {sections.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                 </SelectContent>
               </Select>
-            <Button variant="destructive" disabled={selectedIds.length === 0} onClick={handleBulkDelete}>
-              <Trash2 className="mr-2 h-4 w-4" /> Delete Selected
+            <Button 
+              variant="destructive" 
+              disabled={selectedIds.length === 0 || loading} 
+              onClick={handleBulkDelete}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Selected
+                </>
+              )}
             </Button>
             <div className="text-sm text-gray-600">
               Total: {loading ? "..." : total} students
@@ -528,7 +550,48 @@ function StudentsPageContent() {
           </CardHeader>
           <CardContent>
             {loading ? (
-              <TableRow><TableCell colSpan={6}><div className="h-8 bg-gray-200 animate-pulse rounded w-full" /></TableCell></TableRow>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>
+                      <div className="h-4 w-4 bg-gray-200 animate-pulse rounded" />
+                    </TableHead>
+                    <TableHead><div className="h-4 bg-gray-200 animate-pulse rounded w-20" /></TableHead>
+                    <TableHead><div className="h-4 bg-gray-200 animate-pulse rounded w-24" /></TableHead>
+                    <TableHead><div className="h-4 bg-gray-200 animate-pulse rounded w-16" /></TableHead>
+                    <TableHead><div className="h-4 bg-gray-200 animate-pulse rounded w-16" /></TableHead>
+                    <TableHead><div className="h-4 bg-gray-200 animate-pulse rounded w-16" /></TableHead>
+                    <TableHead><div className="h-4 bg-gray-200 animate-pulse rounded w-20" /></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[...Array(5)].map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><div className="h-4 w-4 bg-gray-200 animate-pulse rounded" /></TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-3">
+                          <div className="h-8 w-8 bg-gray-200 animate-pulse rounded-full" />
+                          <div className="space-y-1">
+                            <div className="h-4 bg-gray-200 animate-pulse rounded w-24" />
+                            <div className="h-3 bg-gray-200 animate-pulse rounded w-16" />
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell><div className="h-4 bg-gray-200 animate-pulse rounded w-20" /></TableCell>
+                      <TableCell><div className="h-4 bg-gray-200 animate-pulse rounded w-24" /></TableCell>
+                      <TableCell><div className="h-4 bg-gray-200 animate-pulse rounded w-20" /></TableCell>
+                      <TableCell><div className="h-4 bg-gray-200 animate-pulse rounded w-16" /></TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <div className="h-8 w-16 bg-gray-200 animate-pulse rounded" />
+                          <div className="h-8 w-16 bg-gray-200 animate-pulse rounded" />
+                          <div className="h-8 w-8 bg-gray-200 animate-pulse rounded" />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
