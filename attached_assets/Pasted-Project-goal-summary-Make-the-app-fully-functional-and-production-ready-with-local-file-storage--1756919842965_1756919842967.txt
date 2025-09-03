@@ -1,0 +1,307 @@
+Project goal (summary)
+
+Make the app fully functional and production-ready with local file storage (no Cloudinary / external DB for student/event assets), robust role-based access control, complete admin & staff features, polished UI/UX, reliable error handling, backup and security measures.
+
+High-level acceptance criteria (must pass)
+
+All student and event media (photos, reports, attendance PDFs) are saved locally in a consistent folder structure and served correctly in the UI. photoUrl in data points to the local file and images render everywhere.
+
+Admin has full CRUD for students & events (including bulk operations). Staff has view-only abilities — no add/edit/delete UI elements or API access.
+
+Student search/filter, attendance, performance tracking, and winner-management features implemented and working.
+
+Dashboard counts and lists update immediately after CRUD actions (no stale UI).
+
+Strong error handling and visible, professional success/error toasts; all buttons show a loading state during operations.
+
+Password reset, session management, audit logging, input validation, and basic encryption/backups implemented.
+
+Code is tested (manual QA checklist + scripts where feasible), documented (README/CHANGELOG), and committed in clear PRs.
+
+Storage & file structure (enforce this exactly)
+
+Use this local layout. Implement server-side code to create missing folders when needed and to return a stable photoUrl:
+
+/storage
+  /students
+    /<batch-year>                # e.g., 2024-2026
+      /<roll_no>                 # e.g., 245213130
+        profile.jpg
+        metadata.json            # student metadata (name, phone, batch, section,…)
+        
+  /events
+    /<year>
+      /<month-name>              # e.g., 09-September
+        /<event-slug-or-id>
+          photos/
+            <filename>.jpg
+          reports/
+            <report>.pdf
+          attendance/
+            attendees.json
+            attendance-sheet.pdf
+          metadata.json
+
+
+Server must serve /storage/* under a secure static route (e.g., GET /storage/*), validating paths to prevent directory traversal.
+
+Milestones & Tasks (detailed)
+Milestone 0 — Repo hygiene & environment (deliverable: PR)
+
+Ensure .replit and replit.nix support Node 18, Next.js, port 8080 for Replit, and NIX pkgs needed.
+
+Create .env.example with required env keys (e.g., STORAGE_BASE_PATH, JWT_SECRET, BACKUP_PATH, ENCRYPTION_KEY).
+
+Add scripts in package.json: dev, start, build, migrate:import, backup.
+
+Deliverable: small PR that adds .replit, .env.example, and npm scripts.
+
+Milestone 1 — Local file storage flow & retrieval (highest priority)
+
+Tasks
+
+Implement backend helper lib/storage.ts:
+
+Functions: saveStudentProfilePhoto(batch, rollNo, file), saveEventFile(year, month, eventId, file, type), readMetadata(path), deleteFolder(path).
+
+Use STORAGE_BASE_PATH from env.
+
+Ensure files are saved with proper extension and mime-type checking.
+
+Modify student create API to:
+
+Accept multipart/form-data upload.
+
+Save file via saveStudentProfilePhoto.
+
+Write metadata.json containing student details and photoUrl (relative path).
+
+Return { success: true, student: { ..., photoUrl } }.
+
+Implement static file serving route ensuring secure path sanitization (no ../).
+
+Update front-end student creation flow:
+
+Upload image to /api/students via FormData and show upload progress.
+
+On response, update local UI state and redirect (or show success toast).
+
+Add delete logic: deleting student must remove folder and metadata; respond with JSON and update UI.
+
+Acceptance tests
+
+Add student with photo -> storage/students/<batch>/<roll>.jpg exists + UI shows photo.
+
+Delete student -> folder removed and UI updates count.
+
+Milestone 2 — Events: storage, gallery, attendance, winners
+
+Tasks
+
+Implement event creation API to accept files (photos/reports/attendance-sheet PDFs) and save to /storage/events/<year>/<month>/<event>/….
+
+Create event gallery API that lists files and returns thumbnails or URLs.
+
+Build event attendance UI:
+
+Mark attendance, store attendees in attendees.json.
+
+Export attendance CSV and PDF generator endpoint.
+
+Implement Winner Management:
+
+DB (local): storage/events/<event>/winners.json and API endpoints to add/remove winners.
+
+UI to add winners, show winners on event page, create winner certificates (template-based PDF generation).
+
+Acceptance tests:
+
+Upload event photos and confirm gallery view displays them.
+
+Mark attendance and confirm attendees.json updated and downloadable.
+
+Add winner -> winners.json updated and visible.
+
+Milestone 3 — Admin features & bulk operations
+
+Tasks
+
+Advanced search & filters for students:
+
+Backend index: implement JSON-based indexing or move to SQLite for faster queries (see DB section).
+
+Add filters: batch, section, attendance %, performance.
+
+Front-end: multi-criteria filter UI with debounced search.
+
+Bulk operations:
+
+Add endpoints for bulk delete, bulk edit (CSV import), bulk photo upload (zip import).
+
+UI: checkbox selection + bulk action dropdown.
+
+Student performance tracking:
+
+Schema: student.metadata include achievements: [] and scores: [].
+
+Add UI to add awards and link to events.
+
+Print / PDF generation:
+
+Implement server-side PDF generation using a lightweight library (headless HTML → PDF).
+
+Add endpoints to generate student lists and profile PDFs.
+
+Acceptance
+
+Use bulk upload to add photos for multiple students; verify file placement.
+
+Generate printable PDF for a student list.
+
+Milestone 4 — Staff features & role enforcement
+
+Tasks
+
+Middleware middleware.ts: centralize role enforcement.
+
+For Next.js API routes, check req.user.role or JWT claims. Return 403 JSON for unauthorized.
+
+Frontend role-based UI:
+
+useAuth hook to expose user.role.
+
+Hide edit/delete/add buttons for staff everywhere.
+
+Disable or remove UI elements (and show tooltip “Admin only” if hovered).
+
+Implement read-only staff dashboards:
+
+View-only student profiles, event attendance, simple search, printable lists.
+
+Acceptance
+
+Login as staff -> no visible edit/delete buttons; API returns 403 if staff tries to hit admin-only endpoint via browser console.
+
+Milestone 5 — Security, backup, and data integrity
+
+Tasks
+
+Authentication improvements:
+
+Password hashing (bcrypt).
+
+Password reset flow (email token or local token file + secure link).
+
+Session management: JWT with expiry + server-side refresh tokens if needed.
+
+Account lockout after X failed attempts.
+
+Audit logging:
+
+Write storage/logs/audit.log or JSON log entries for create/update/delete with userId, timestamp, action, target.
+
+File upload safety:
+
+Validate MIME type and file extension.
+
+Limit file size and scan filenames.
+
+Data backup & restore:
+
+scripts/backup.js: compress /storage + DB (if any) and save to BACKUP_PATH with timestamp.
+
+Provide restore command.
+
+Data encryption at rest (optional minimum):
+
+Allow enabling encryption of sensitive metadata using an env ENCRYPTION_KEY (AES). If implemented, store encrypted JSON and add helper to decrypt for UI. Document trade-offs.
+
+Input sanitization and validations across APIs.
+
+Acceptance
+
+Backup script runs and creates ZIP.
+
+Audit log entries exist for CRUD operations.
+
+Milestone 6 — UI/UX polish & performance
+
+Tasks
+
+Buttons & loading states:
+
+Add a shared Button component with loading prop; replace button content with spinner on actions.
+
+Add skeleton loaders for tables and pages.
+
+Toasters/modals:
+
+Add success & error toasts (consistent colors, accessible).
+
+Responsive header & layout:
+
+Fix header nav collapse for mobile, ensure drawer or hamburger menu, responsive table UI.
+
+Advanced tables:
+
+Use a table component with sorting, server-side pagination, server-side filtering, bulk select.
+
+Accessibility improvements:
+
+ARIA labels, keyboard navigation, focus management.
+
+Performance:
+
+Cache list endpoints, debounce search, lazy-load images (use loading="lazy").
+
+Acceptance
+
+Buttons show spinner immediately; pages show skeletons; header collapses correctly on small screens.
+
+Milestone 7 — Analytics & reporting
+
+Tasks
+
+Implement custom date range filters and export to CSV/Excel.
+
+Add analytics endpoints to compute:
+
+Student counts by batch, gender, attendance rates.
+
+Event attendance trends.
+
+Dashboard widgets with charts (recharts or similar).
+
+Export analytics as PDFs.
+
+Acceptance
+
+Analytics UI shows correct numbers and CSV export works.
+
+Milestone 8 — Tests, QA checklist & docs
+
+Tasks
+
+Provide a QA checklist and run manual tests (A–Z test for every page and button).
+
+Add basic unit tests for key utility functions (storage helpers) and integration tests for critical flows (login, add student, delete student).
+
+Update README.md with:
+
+Setup instructions
+
+Local dev instructions
+
+Backup/restore steps
+
+Folder structure
+
+Provide CHANGELOG.md listing all fixes.
+
+Deliverables
+
+PR per milestone with descriptive commit messages.
+
+Test logs/screenshots for acceptance tests.
+
+README + migration instructions.
