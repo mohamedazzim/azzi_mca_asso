@@ -31,6 +31,12 @@ const nextConfig = {
       },
     ]
   },
+  // Enable all hosts for Replit environment
+  async rewrites() {
+    return []
+  },
+  // Ensure proper hostname handling for Replit proxy
+  trailingSlash: false,
 };
 
 export default nextConfig;
