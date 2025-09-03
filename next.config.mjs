@@ -37,6 +37,12 @@ const nextConfig = {
   },
   // Ensure proper hostname handling for Replit proxy
   trailingSlash: false,
+  // Critical: Allow all hosts for Replit proxy
+  devIndicators: {
+    buildActivity: false,
+  },
+  // Ensure Replit compatibility
+  compress: false,
 };
 
 export default nextConfig;
