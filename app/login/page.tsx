@@ -170,9 +170,26 @@ export default function LoginPage() {
         body: JSON.stringify(credentials),
       })
 
-      const data = await response.json()
+      if (!response.ok) {
+        // Try to parse error JSON safely, otherwise use plain text
+        const text = await response.text()
+        try {
+          const errJson = JSON.parse(text)
+          throw new Error(errJson.error || errJson.message || "Login failed")
+        } catch {
+          throw new Error(text || `HTTP ${response.status}`)
+        }
+      }
 
-      if (response.ok && data.success) {
+      // Now parse JSON safely
+      let data
+      try {
+        data = await response.json()
+      } catch (e) {
+        throw new Error("Invalid JSON response from server")
+      }
+
+      if (data.success) {
         // Store user data in localStorage for frontend access (with role)
         localStorage.setItem("user", JSON.stringify(data.user))
         router.replace("/admin/dashboard")

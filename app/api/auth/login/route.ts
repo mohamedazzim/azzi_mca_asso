@@ -2,6 +2,11 @@ import { type NextRequest, NextResponse } from "next/server"
 import { getUsers } from "@/lib/local-db"
 import bcrypt from "bcryptjs"
 
+// Handle non-POST requests with proper JSON response
+export async function GET() {
+  return NextResponse.json({ error: "Method not allowed. Use POST." }, { status: 405 })
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { username, password } = await request.json()

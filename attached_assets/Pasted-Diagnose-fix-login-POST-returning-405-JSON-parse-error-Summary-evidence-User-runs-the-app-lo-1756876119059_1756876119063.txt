@@ -1,0 +1,209 @@
+Diagnose & fix login POST returning 405 + JSON parse error
+
+Summary / evidence:
+User runs the app locally and cannot sign in (affects Admin and Staff). Screenshot shows:
+
+POST https://azzi-mca-asso.vercel.app/api/auth/login 405 (Method Not Allowed)
+
+Console: Login error: SyntaxError: Failed to execute 'json' on 'Response': Unexpected end of JSON input
+
+UI: “Network error. Please try again.”
+
+Immediate interpretation:
+
+405 Method Not Allowed means the server endpoint /api/auth/login does not accept POST (or the request is being routed incorrectly).
+
+Unexpected end of JSON input means the client tried to response.json() but the response body was empty or not valid JSON. These two are linked: because the server returned a 405 with no JSON body (or returned HTML/empty), the client’s JSON parsing failed.
+
+The request in the screenshot is going to https://...vercel.app — when running locally the client might be calling the production URL (hardcoded base URL) instead of local http://localhost:3000 or relative /api/.... That can hide local backend problems and cause CORS/authorization issues.
+
+Tasks for you (agent) — Diagnose then fix
+
+Do the following in order, with edits + commits for each fix and tests after each step.
+
+1) Confirm routing & method support (server)
+
+Locate the API route file handling login. For Next.js this is typically:
+
+pages/api/auth/login.js / pages/api/auth/login.ts OR
+
+app/api/auth/login/route.js (app-router)
+
+Open the file and confirm it handles POST. If it's only handling GET, change it to accept POST. Example (pages/api style):
+
+// pages/api/auth/login.js
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    res.setHeader("Allow", ["POST"]);
+    return res.status(405).json({ error: "Method Not Allowed" });
+  }
+
+  try {
+    const { username, password } = req.body;
+    // ...authenticate...
+    return res.status(200).json({ success: true, token: "..." });
+  } catch (err) {
+    console.error("login error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+
+If using app router (route.js) pattern:
+
+// app/api/auth/login/route.js
+import { NextResponse } from "next/server";
+
+export async function POST(request) {
+  const body = await request.json();
+  // authenticate...
+  return NextResponse.json({ success: true, token: "..." });
+}
+
+export function GET() {
+  return NextResponse.json({ message: "Use POST" }, { status: 405 });
+}
+
+
+Make sure every non-POST branch returns JSON (not an empty response), so client parsing always gets JSON.
+
+2) Make client-safe JSON handling
+
+Update the login fetch logic to:
+
+Use relative URL (not hardcoded production URL) when running locally or use an env var.
+
+Include Content-Type: application/json.
+
+Check response.ok before calling .json() and guard JSON parsing with try/catch.
+
+Example:
+
+// e.g., src/services/auth.js or login handler
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+
+async function login(username, password) {
+  const res = await fetch(`${API_BASE}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+
+  if (!res.ok) {
+    // Try to parse error JSON safely, otherwise use plain text.
+    const text = await res.text();
+    try {
+      const errJson = JSON.parse(text);
+      throw new Error(errJson.error || errJson.message || "Login failed");
+    } catch {
+      throw new Error(text || `HTTP ${res.status}`);
+    }
+  }
+
+  // Now parse JSON safely
+  try {
+    const data = await res.json();
+    return data;
+  } catch (e) {
+    throw new Error("Invalid JSON response from server");
+  }
+}
+
+3) Fix base-URL usage (local vs deployed)
+
+Search the client code for any absolute API URLs like https://azzi-mca-asso.vercel.app/api/.... Replace with either a relative path "/api/auth/login" or use the env variable pattern:
+
+NEXT_PUBLIC_API_BASE_URL (default empty string for relative).
+
+Update .env.local and README instructions:
+
+NEXT_PUBLIC_API_BASE_URL= (leave empty for local dev)
+
+For production: NEXT_PUBLIC_API_BASE_URL=https://your-deployment-url
+
+Rationale: Using relative paths when in local dev calls local Next.js API routes rather than production url.
+
+4) CORS / preflight (if calling a different host)
+
+If the client needs to call a different origin (e.g., production API while developing), ensure the API returns appropriate CORS headers on OPTIONS preflight and on actual responses:
+
+Access-Control-Allow-Origin: <origin> (or * for dev)
+
+Allow methods including POST
+
+Prefer instead to use relative paths for local dev to avoid CORS.
+
+5) Add diagnostic logs & acceptance tests
+
+Add logs in the API route: log req.method, req.body, and error traces. Temporarily add console.log responses for debugging.
+
+After code changes, run these tests locally:
+
+Quick manual tests (use terminal + browser DevTools)
+
+cURL test:
+
+curl -i -X POST -H "Content-Type: application/json" \
+  -d '{"username":"staff@bhc.edu.in","password":"Staff@MCA"}' \
+  http://localhost:3000/api/auth/login
+
+
+Expect HTTP/1.1 200 OK (or appropriate error JSON) and a JSON body.
+
+Browser Network tab:
+
+Submit login from UI, confirm:
+
+request method = POST
+
+request URL = http://localhost:3000/api/auth/login (not vercel)
+
+response code = 200 or 4xx with JSON body (not empty)
+
+response has Content-Type: application/json
+
+UI acceptance:
+
+Login as thams.ca@bhc.edu.in / Azzi@2026 — Admin should log in and redirect to dashboard.
+
+Login as staff@bhc.edu.in / Staff@MCA — Staff should log in with correct role and permissions.
+
+6) Defensive server behavior
+
+Always return JSON even on errors:
+
+res.status(405).json({ error: 'Method Not Allowed' })
+
+res.status(400).json({ error: 'Missing credentials' })
+
+res.status(401).json({ error: 'Invalid credentials' })
+
+This prevents the client from trying to parse an empty body.
+
+7) Final cleanup & commit
+
+Remove or reduce verbose debug logs.
+
+Add unit/endpoint test (optional) or at least add a QA checklist in README describing the curl test and manual test steps.
+
+Commit with message: fix(auth): handle POST in /api/auth/login, add safe JSON parsing and relative API base URL
+
+Acceptance criteria (must pass)
+
+Login POST to /api/auth/login returns a valid JSON body on success and JSON errors on failure (no empty responses).
+
+Client no longer throws Unexpected end of JSON input.
+
+When run locally, login requests go to local API (relative path) — network tab shows localhost:3000 (or configured local host) not vercel.
+
+Admin login works and redirects to dashboard; Staff login works with correct permissions.
+
+All fixes are committed and reachable in the repo with a small QA checklist in README.
+
+Extra notes for agent
+
+If the login API is in a separate backend service (not Next.js API routes), do the equivalent changes there: ensure POST handler exists and returns JSON, ensure CORS is allowed if client calls a different origin, ensure correct base URL configured in client env.
+
+If using token-based auth, ensure token returned JSON has { token: "..." } and client stores it (e.g., localStorage) only after success.
+
+If after these steps you still get 405, add a breakpoint or console.log at the server entry to see how the route is being matched — maybe the file path/name is incorrect, or a middleware is blocking POST.
