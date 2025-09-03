@@ -2,18 +2,28 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, Loader2 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function AppHeader() {
   const pathname = usePathname();
   const router = useRouter();
+  const [loggingOut, setLoggingOut] = useState(false);
+  
   if (pathname === "/login") return null;
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    router.replace("/login");
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      // Add a small delay to show the loading state
+      await new Promise(resolve => setTimeout(resolve, 500));
+      localStorage.removeItem("user");
+      router.replace("/login");
+    } finally {
+      setLoggingOut(false);
+    }
   };
   return (
     <header className="w-full bg-white shadow-sm border-b sticky top-0 z-50">
@@ -46,9 +56,24 @@ export default function AppHeader() {
           </div>
           {/* Right side - Logout Button */}
           <div className="flex items-center">
-            <Button variant="outline" size="sm" className="flex items-center space-x-1" onClick={handleLogout}>
-              <LogOut className="h-4 w-4" />
-              <span>Logout</span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center space-x-1" 
+              onClick={handleLogout}
+              disabled={loggingOut}
+            >
+              {loggingOut ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Logging out...</span>
+                </>
+              ) : (
+                <>
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
+                </>
+              )}
             </Button>
           </div>
         </div>

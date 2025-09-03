@@ -17,8 +17,7 @@ const ensureDirectories = () => {
     EVENTS_DIR,
     METADATA_DIR,
     path.join(STUDENTS_DIR, 'batches'),
-    path.join(EVENTS_DIR, 'event-files'),
-    path.join(EVENTS_DIR, 'media')
+    path.join(EVENTS_DIR, 'years')
   ];
 
   dirs.forEach(dir => {
@@ -51,16 +50,37 @@ export const getBatchPath = (batchYear: string): string => {
   return batchPath;
 };
 
-// Get event folder path
-export const getEventPath = (eventId: string): string => {
+// Get event year and month from date
+export const getEventYearMonth = (eventDate: string | Date): { year: string, month: string } => {
+  const date = new Date(eventDate);
+  const year = date.getFullYear().toString();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // 01-12
+  return { year, month };
+};
+
+// Get event folder path organized by year/month
+export const getEventPath = (eventDate: string | Date, eventId: string): string => {
+  const { year, month } = getEventYearMonth(eventDate);
   const sanitizedEventId = sanitizeFilename(eventId);
-  const eventPath = path.join(EVENTS_DIR, 'media', sanitizedEventId);
+  const eventPath = path.join(EVENTS_DIR, 'years', year, month, sanitizedEventId);
   
   if (!existsSync(eventPath)) {
     mkdirSync(eventPath, { recursive: true });
   }
   
   return eventPath;
+};
+
+// Get event metadata folder path
+export const getEventMetadataPath = (eventDate: string | Date): string => {
+  const { year, month } = getEventYearMonth(eventDate);
+  const metadataPath = path.join(EVENTS_DIR, 'years', year, month);
+  
+  if (!existsSync(metadataPath)) {
+    mkdirSync(metadataPath, { recursive: true });
+  }
+  
+  return metadataPath;
 };
 
 // Student file operations
@@ -313,8 +333,8 @@ export class EventStorage {
       }
 
       const id = generateId();
-      const eventDir = path.join(EVENTS_DIR, 'event-files');
-      const eventFile = path.join(eventDir, `${id}.json`);
+      const eventMetadataDir = getEventMetadataPath(eventData.eventDate);
+      const eventFile = path.join(eventMetadataDir, `${id}.json`);
       
       const eventRecord = {
         ...eventData,
@@ -333,10 +353,22 @@ export class EventStorage {
 
   static async getEvent(id: string): Promise<any | null> {
     try {
-      const eventFile = path.join(EVENTS_DIR, 'event-files', `${id}.json`);
-      if (existsSync(eventFile)) {
-        const data = await fs.readFile(eventFile, 'utf-8');
-        return JSON.parse(data);
+      // Search through all year/month directories to find the event
+      const yearsDir = path.join(EVENTS_DIR, 'years');
+      if (!existsSync(yearsDir)) return null;
+      
+      const years = await fs.readdir(yearsDir);
+      for (const year of years) {
+        const yearPath = path.join(yearsDir, year);
+        const months = await fs.readdir(yearPath);
+        for (const month of months) {
+          const monthPath = path.join(yearPath, month);
+          const eventFile = path.join(monthPath, `${id}.json`);
+          if (existsSync(eventFile)) {
+            const data = await fs.readFile(eventFile, 'utf-8');
+            return JSON.parse(data);
+          }
+        }
       }
       return null;
     } catch (error) {
@@ -350,14 +382,46 @@ export class EventStorage {
       const event = await this.getEvent(id);
       if (!event) return false;
 
-      const eventFile = path.join(EVENTS_DIR, 'event-files', `${id}.json`);
+      // Find the event file location
+      const eventMetadataDir = getEventMetadataPath(event.eventDate);
+      const eventFile = path.join(eventMetadataDir, `${id}.json`);
+      
       const updatedEvent = {
         ...event,
         ...updateData,
         updatedAt: new Date().toISOString()
       };
       
-      await fs.writeFile(eventFile, JSON.stringify(updatedEvent, null, 2));
+      // If event date changed, move to new location
+      if (updateData.eventDate && updateData.eventDate !== event.eventDate) {
+        const newMetadataDir = getEventMetadataPath(updateData.eventDate);
+        const newEventFile = path.join(newMetadataDir, `${id}.json`);
+        
+        // Save to new location and delete old one
+        await fs.writeFile(newEventFile, JSON.stringify(updatedEvent, null, 2));
+        if (existsSync(eventFile)) {
+          await fs.unlink(eventFile);
+        }
+        
+        // Move media files if they exist
+        const oldMediaPath = getEventPath(event.eventDate, id);
+        const newMediaPath = getEventPath(updateData.eventDate, id);
+        if (existsSync(oldMediaPath) && oldMediaPath !== newMediaPath) {
+          // Move files to new location
+          const files = await fs.readdir(oldMediaPath);
+          for (const file of files) {
+            const oldFile = path.join(oldMediaPath, file);
+            const newFile = path.join(newMediaPath, file);
+            await fs.rename(oldFile, newFile);
+          }
+          // Remove old directory
+          await fs.rmdir(oldMediaPath);
+        }
+      } else {
+        // Just update in current location
+        await fs.writeFile(eventFile, JSON.stringify(updatedEvent, null, 2));
+      }
+      
       return true;
     } catch (error) {
       console.error('Error updating event:', error);
@@ -367,24 +431,29 @@ export class EventStorage {
 
   static async deleteEvent(id: string): Promise<boolean> {
     try {
-      const eventFile = path.join(EVENTS_DIR, 'event-files', `${id}.json`);
+      // Get event first to know its location
+      const event = await this.getEvent(id);
+      if (!event) return false;
+      
+      // Delete event metadata file
+      const eventMetadataDir = getEventMetadataPath(event.eventDate);
+      const eventFile = path.join(eventMetadataDir, `${id}.json`);
       if (existsSync(eventFile)) {
         await fs.unlink(eventFile);
-        
-        // Delete associated event media folder
-        const eventMediaPath = getEventPath(id);
-        if (existsSync(eventMediaPath)) {
-          const files = await fs.readdir(eventMediaPath);
-          for (const file of files) {
-            await fs.unlink(path.join(eventMediaPath, file));
-          }
-          // Remove the directory itself
-          await fs.rmdir(eventMediaPath);
-        }
-        
-        return true;
       }
-      return false;
+      
+      // Delete associated event media folder
+      const eventMediaPath = getEventPath(event.eventDate, id);
+      if (existsSync(eventMediaPath)) {
+        const files = await fs.readdir(eventMediaPath);
+        for (const file of files) {
+          await fs.unlink(path.join(eventMediaPath, file));
+        }
+        // Remove the directory itself
+        await fs.rmdir(eventMediaPath);
+      }
+      
+      return true;
     } catch (error) {
       console.error('Error deleting event:', error);
       return false;
@@ -394,15 +463,26 @@ export class EventStorage {
   static async getAllEvents(filters?: any): Promise<any[]> {
     try {
       const events: any[] = [];
-      const eventFilesDir = path.join(EVENTS_DIR, 'event-files');
-      const files = await fs.readdir(eventFilesDir);
+      const yearsDir = path.join(EVENTS_DIR, 'years');
       
-      for (const file of files) {
-        if (file.endsWith('.json')) {
-          const filePath = path.join(eventFilesDir, file);
-          const data = await fs.readFile(filePath, 'utf-8');
-          const event = JSON.parse(data);
-          events.push(event);
+      if (!existsSync(yearsDir)) return events;
+      
+      const years = await fs.readdir(yearsDir);
+      for (const year of years) {
+        const yearPath = path.join(yearsDir, year);
+        const months = await fs.readdir(yearPath);
+        for (const month of months) {
+          const monthPath = path.join(yearPath, month);
+          const files = await fs.readdir(monthPath);
+          
+          for (const file of files) {
+            if (file.endsWith('.json')) {
+              const filePath = path.join(monthPath, file);
+              const data = await fs.readFile(filePath, 'utf-8');
+              const event = JSON.parse(data);
+              events.push(event);
+            }
+          }
         }
       }
       
@@ -428,14 +508,14 @@ export class EventStorage {
     }
   }
 
-  static async saveEventFile(eventId: string, fileBuffer: Buffer, fileType: 'photo' | 'report' | 'attendance', filename: string): Promise<string> {
+  static async saveEventFile(eventId: string, eventDate: string | Date, fileBuffer: Buffer, fileType: 'photo' | 'report' | 'attendance', filename: string): Promise<string> {
     try {
       const extension = path.extname(filename);
       const sanitizedName = sanitizeFilename(path.basename(filename, extension));
       const timestamp = Date.now();
       const finalFilename = `${fileType}_${timestamp}_${sanitizedName}${extension}`;
       
-      const eventPath = getEventPath(eventId);
+      const eventPath = getEventPath(eventDate, eventId);
       const filePath = path.join(eventPath, finalFilename);
       await fs.writeFile(filePath, fileBuffer);
       
