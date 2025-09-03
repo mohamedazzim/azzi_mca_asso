@@ -269,7 +269,7 @@ export class PerformanceMonitor {
     
     // Log slow operations in development
     if (process.env.NODE_ENV === 'development' && duration > 1000) {
-      console.warn(`[Performance] Slow operation: ${label} took ${duration}ms`);
+      
     }
     
     return duration;

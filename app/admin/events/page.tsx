@@ -95,7 +95,7 @@ function EventsPageContent() {
       setTotalPages(data.totalPages || 1)
       setTotal(data.total || 0)
     } catch (error) {
-      console.error('Error fetching events:', error)
+      // Events fetch error handled silently in production
       const errorMessage = error instanceof Error ? error.message : "Unable to load event data"
       setError(errorMessage)
       errorHandler(error)
@@ -166,7 +166,7 @@ function EventsPageContent() {
       // Refresh the list
       await fetchEvents()
     } catch (error) {
-      console.error('Error deleting event:', error)
+      // Event deletion error handled silently in production
       errorHandler(error)
     } finally {
       setDeletingId(null)

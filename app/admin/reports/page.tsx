@@ -106,7 +106,7 @@ export default function ReportsPage() {
         setReports(reports)
         setFiltered(reports)
       } catch (error) {
-        console.error('Error fetching reports:', error)
+        // Reports fetch error handled silently in production
         setReports([])
         setFiltered([])
       } finally {

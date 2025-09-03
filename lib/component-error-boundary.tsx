@@ -59,9 +59,9 @@ export class ErrorBoundary extends Component<Props, State> {
     // Log to console in development
     if (process.env.NODE_ENV === 'development') {
       console.group('🔥 Component Error Boundary');
-      console.error('Error:', error);
-      console.error('Error Info:', errorInfo);
-      console.error('Component Stack:', errorInfo.componentStack);
+      
+      
+      
       console.groupEnd();
     }
 
@@ -85,7 +85,7 @@ export class ErrorBoundary extends Component<Props, State> {
     };
 
     // For now, just log to console in production
-    console.error('[Error Boundary]', errorData);
+    
   };
 
   private handleRetry = () => {
@@ -287,7 +287,7 @@ export const CriticalErrorBoundary: React.FC<{ children: ReactNode }> = ({ child
 export const useErrorHandler = () => {
   const handleError = React.useCallback((error: Error, context?: string) => {
     // In a real app, you might want to send this to an error reporting service
-    console.error(`[Error Handler] ${context || 'Unknown'}:`, error);
+    
     
     // You could also trigger a toast notification or other user feedback
     throw error; // This will be caught by the nearest error boundary

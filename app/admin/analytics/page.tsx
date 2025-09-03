@@ -235,7 +235,7 @@ function AnalyticsPageContent() {
       const data = await response.json()
       setAnalytics(data)
     } catch (error) {
-      console.error('Error fetching analytics:', error)
+      // Analytics fetch error handled silently in production
       toast({
         title: "Error",
         description: "Failed to fetch analytics data",

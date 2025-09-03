@@ -239,7 +239,7 @@ function EditStudentPageContent() {
           hostellerStatus: student.hostellerStatus || "",
         })
       } catch (error) {
-        console.error('Error fetching student:', error)
+        // Student fetch error handled silently in production
         toast({
           title: "Error",
           description: "Failed to fetch student data",
@@ -315,7 +315,7 @@ function EditStudentPageContent() {
 
       if (!response.ok) {
         const errorData = await response.json()
-        console.error("Upload error:", errorData)
+        // Photo upload error handled silently in production
         throw new Error(errorData.error || 'Failed to upload photo')
       }
 
@@ -340,7 +340,7 @@ function EditStudentPageContent() {
         description: "Photo uploaded and stored in database successfully",
       })
     } catch (error) {
-      console.error('Error uploading photo:', error)
+      // Photo upload error handled silently in production
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to upload photo",
@@ -416,7 +416,7 @@ function EditStudentPageContent() {
       })
       router.push("/admin/students")
     } catch (error) {
-      console.error('Error updating student:', error)
+      // Student update error handled silently in production
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to update student",

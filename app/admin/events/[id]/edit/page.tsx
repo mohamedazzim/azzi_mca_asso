@@ -212,7 +212,7 @@ function EditEventPageContent() {
         setReportUrl(event.reportUrl || "");
         setAttendanceSheetUrl(event.attendanceSheetUrl || "");
       } catch (error) {
-        console.error('Error fetching event:', error)
+        // Event fetch error handled silently in production
         toast({
           title: "Error",
           description: "Failed to fetch event data",
@@ -265,7 +265,7 @@ function EditEventPageContent() {
       })
       router.push("/admin/events")
     } catch (error) {
-      console.error('Error updating event:', error)
+      // Event update error handled silently in production
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to update event",

@@ -210,7 +210,7 @@ class EnvironmentValidator {
     if (result.warnings.length > 0) {
       result.warnings.forEach(warning => {
         if (typeof console !== 'undefined' && process.env.NODE_ENV === 'development') {
-          console.warn(`[ENV WARNING] ${warning}`);
+          
         }
       });
     }
@@ -229,7 +229,7 @@ try {
   validatedConfig = envValidator.getValidatedConfig();
 } catch (error) {
   if (process.env.NODE_ENV !== 'test') {
-    console.error('❌ Environment validation failed:', error);
+    
     process.exit(1);
   }
   // In test environment, use defaults
