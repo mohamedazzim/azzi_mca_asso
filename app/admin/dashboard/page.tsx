@@ -194,16 +194,14 @@ function AdminDashboardContent() {
     photo?: string;
   }>>([]);
 
-  useEffect(() => {
-    fetchDashboardData()
-  }, [])
-
   const fetchDashboardData = async () => {
     try {
       setLoading(true)
       
       // Fetch stats
-      const statsResponse = await fetch('/api/analytics')
+      const statsResponse = await fetch('/api/analytics', {
+        headers: { 'Cache-Control': 'no-cache' }
+      })
       if (statsResponse.ok) {
         const statsData = await statsResponse.json()
         setStats({
@@ -218,7 +216,9 @@ function AdminDashboardContent() {
       }
 
       // Fetch recent events (all statuses, most recent first)
-      const eventsResponse = await fetch('/api/events?limit=3&sort=desc')
+      const eventsResponse = await fetch('/api/events?limit=3&sort=desc', {
+        headers: { 'Cache-Control': 'no-cache' }
+      })
       if (eventsResponse.ok) {
         const eventsData = await eventsResponse.json()
         setUpcomingEvents((eventsData.events || []).slice(0, 3))
@@ -229,6 +229,15 @@ function AdminDashboardContent() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    fetchDashboardData()
+    
+    // Set up an interval to refresh data periodically
+    const interval = setInterval(fetchDashboardData, 30000) // Refresh every 30 seconds
+    
+    return () => clearInterval(interval)
+  }, [])
 
   // Remove 'Total Winners' from statsCards
   const statsCards = [

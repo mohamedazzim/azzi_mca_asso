@@ -1,0 +1,71 @@
+I am still facing issues with local storage and dashboard counts. Please fix the following and make the app production-ready.
+
+1) Local Storage for Students & Events
+
+Students: When adding a student, save the uploaded photo in the correct batch folder. The file name must be the student’s roll_no.
+
+Ensure photoUrl in the JSON/data points to this stored file.
+
+Events: Apply the same logic to event media/files—store them under the respective event folder and update references accordingly.
+
+Ensure all data (photos, JSON/metadata) is stored locally and can be properly retrieved across the app (list views, detail pages, edit forms).
+
+2) Fix Dashboard Counts (Students & Events)
+
+On the main dashboard, the student count is not updating when a new student is added. Fix this so counts update immediately after create/update/delete (no manual refresh).
+
+Do the same for event counts—they must reflect the latest state.
+
+Make sure counts also decrement on delete and recalculate on edits that change batch/event associations.
+
+3) End-to-End Functionality Check
+
+Verify add / view / update / delete flows for students and events with local storage (no cloud dependencies).
+
+Ensure all screens and components properly read from and write to local storage (files + metadata).
+
+Fix any broken buttons/links where an alert shows but the action does not complete (e.g., student delete).
+
+Keep an eye on state updates: after any CRUD action, UI should reflect the latest data (lists, detail pages, dashboard widgets).
+
+4) Robustness & Production Readiness
+
+Add validation, error handling, and graceful fallbacks for missing files/records.
+
+Avoid hard-coded paths; use a configurable base storage path.
+
+Ensure the storage structure is consistent and scalable (e.g., storage/students/<batch>/<roll_no>.jpg and storage/events/<event_id>/ with a metadata file).
+
+Make sure nothing breaks for existing features; do not introduce regressions.
+
+5) Acceptance Criteria (must all pass)
+
+Adding a student:
+
+Photo saved to storage/students/<batch>/<roll_no>.<ext>.
+
+photoUrl correctly points to local file.
+
+Dashboard student count increments immediately.
+
+Deleting a student:
+
+Metadata and photo removed.
+
+Lists and dashboard count update immediately.
+
+Same acceptance tests for events (create/update/delete/media).
+
+All pages fetch the latest local data without stale caches.
+
+No Cloudinary or MongoDB dependencies remain for these flows.
+
+6) Deliverables
+
+Updated code implementing the fixes.
+
+Any config/env changes needed for local paths.
+
+A short CHANGELOG or README section documenting the new local storage design and how counts are updated.
+
+Think deeper and act: please review each related component to ensure the entire application is bug-free, consistent, and production-ready with the above requirements.
