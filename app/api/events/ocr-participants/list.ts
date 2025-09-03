@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ files });
   } catch (err: any) {
-    console.error("LIST FILES ERROR:", err);
+    
     return NextResponse.json({ error: err.message || "Internal Server Error" }, { status: 500 });
   }
 }

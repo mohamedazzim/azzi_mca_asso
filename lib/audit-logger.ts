@@ -62,7 +62,7 @@ export class AuditLogger {
         await mkdir(AUDIT_LOG_PATH, { recursive: true });
       }
     } catch (error) {
-      console.error('Failed to create audit log directory:', error);
+      
     }
   }
 
@@ -168,13 +168,13 @@ export class AuditLogger {
     
     switch (entry.severity) {
       case 'critical':
-        console.error(message, entry.error || '');
+        
         break;
       case 'high':
-        console.warn(message);
+        
         break;
       default:
-        console.log(message);
+        
     }
   }
 
@@ -197,7 +197,7 @@ export class AuditLogger {
       await this.rotateLogsIfNeeded(logFilePath);
       
     } catch (error) {
-      console.error('Failed to write audit logs:', error);
+      
       // Put logs back in buffer for retry
       this.logBuffer.unshift(...logsToFlush);
     }
@@ -212,10 +212,10 @@ export class AuditLogger {
         
         // In a real implementation, you'd move the file
         // For now, we'll just create a new file
-        console.log(`Log file ${filePath} needs rotation (${stats.size} bytes)`);
+        
       }
     } catch (error) {
-      console.error('Error checking log file size:', error);
+      
     }
   }
 

@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
 
     return new NextResponse(fileData.buffer, { status: 200, headers });
   } catch (err: any) {
-    console.error("DOWNLOAD FILE ERROR:", err);
+    
     return NextResponse.json({ error: err.message || "Internal Server Error" }, { status: 500 });
   }
 }

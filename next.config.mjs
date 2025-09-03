@@ -2,16 +2,31 @@
 const nextConfig = {
   images: {
     formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 60,
+    minimumCacheTTL: 3600, // 1 hour cache for images
+    dangerouslyAllowSVG: false,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   output: 'standalone',
-  // Disable ESLint during build to avoid deployment issues
-  eslint: {
-    ignoreDuringBuilds: true,
+  
+  // Performance optimizations
+  compress: true,
+  poweredByHeader: false,
+  
+  // Enable SWC minification
+  swcMinify: true,
+  
+  // Optimize bundle
+  experimental: {
+    optimizeCss: true,
+    serverComponentsExternalPackages: ['canvas']
   },
-  // Disable TypeScript errors during build to avoid deployment issues
+  // Enable ESLint during build for production quality
+  eslint: {
+    ignoreDuringBuilds: false,
+  },
+  // Enable TypeScript error checking during build
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   // Configure server to bind to all interfaces for Replit compatibility
   experimental: {

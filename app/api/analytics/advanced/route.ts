@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error generating advanced analytics:', error);
+    
     return NextResponse.json(
       { error: 'Failed to generate analytics' },
       { status: 500 }
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error generating custom analytics:', error);
+    
     return NextResponse.json(
       { error: 'Failed to generate custom analytics' },
       { status: 500 }

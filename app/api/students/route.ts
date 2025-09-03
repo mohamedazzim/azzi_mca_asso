@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { StudentStorage } from "@/lib/local-storage"
+import { withApiSecurity, ValidationSchemas, validateInput } from "@/lib/api-security"
 
 // Helper functions for advanced filtering
 function calculateAge(birthDate: Date): number {
@@ -43,7 +44,7 @@ function calculatePerformanceScore(student: any): number {
   return Math.min(100, Math.max(0, baseScore)) // Clamp between 0-100
 }
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const search = searchParams.get("search")
@@ -194,7 +195,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   const role = request.headers.get("x-user-role")
   if (role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
@@ -298,3 +299,15 @@ export async function POST(request: NextRequest) {
     }, { status: 500 })
   }
 }
+
+// Export handlers with security middleware
+export const GET = withApiSecurity(handleGET, {
+  allowedMethods: ['GET'],
+  requireAuth: false
+});
+
+export const POST = withApiSecurity(handlePOST, {
+  allowedMethods: ['POST'],
+  validateInput: ValidationSchemas.student,
+  requireAuth: true
+});

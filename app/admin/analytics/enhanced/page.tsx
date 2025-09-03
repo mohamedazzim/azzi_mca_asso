@@ -66,7 +66,7 @@ export default function EnhancedAnalyticsPage() {
         throw new Error('Failed to fetch analytics');
       }
     } catch (error) {
-      console.error('Error fetching analytics:', error);
+      
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -136,7 +136,7 @@ export default function EnhancedAnalyticsPage() {
         throw new Error('Export failed');
       }
     } catch (error) {
-      console.error('Error exporting analytics:', error);
+      
       alert('Export failed. Please try again.');
     } finally {
       setExporting(false);

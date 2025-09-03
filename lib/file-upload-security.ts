@@ -254,7 +254,7 @@ export async function quarantineFile(
     return quarantineFile;
     
   } catch (error) {
-    console.error('Failed to quarantine file:', error);
+    
     throw new Error('Failed to quarantine suspicious file');
   }
 }
@@ -278,7 +278,7 @@ export async function checkStorageQuota(): Promise<{
       warning: percentage > 80
     };
   } catch (error) {
-    console.error('Failed to check storage quota:', error);
+    
     return {
       used: 0,
       available: UPLOAD_CONFIG.maxTotalSize,
@@ -308,7 +308,7 @@ async function calculateDirectorySize(dirPath: string): Promise<number> {
       }
     }
   } catch (error) {
-    console.error(`Error calculating size for ${dirPath}:`, error);
+    
   }
   
   return totalSize;

@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validatePassword, hashPassword, verifyPassword } from '@/lib/auth-security';
 import { auditLogger, logAuth } from '@/lib/audit-logger';
+import { withRateLimit, RATE_LIMIT_CONFIGS } from '@/lib/rate-limiter';
 
 // POST - Change password with security validation
 export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = await withRateLimit(request, 'password-change', RATE_LIMIT_CONFIGS.passwordChange);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const { currentPassword, newPassword, userId, username } = await request.json();
 
@@ -65,7 +72,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error changing password:', error);
     return NextResponse.json(
       { error: 'Failed to change password' },
       { status: 500 }

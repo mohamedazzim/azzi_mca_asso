@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('Error exporting analytics:', error);
+    
     return NextResponse.json(
       { error: 'Failed to export analytics' },
       { status: 500 }
@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error getting export options:', error);
+    
     return NextResponse.json(
       { error: 'Failed to get export options' },
       { status: 500 }

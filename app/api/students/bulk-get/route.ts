@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 export async function POST(request: NextRequest) {
   try {
     const { ids } = await request.json();
-    console.log("bulk-get incoming ids:", ids);
+    
     if (!Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json({ error: "No student IDs provided" }, { status: 400 });
     }
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     }));
     return NextResponse.json({ students: result });
   } catch (error) {
-    console.error("Error in bulk-get:", error);
+    
     return NextResponse.json({ error: "Failed to fetch students" }, { status: 500 });
   }
 } 

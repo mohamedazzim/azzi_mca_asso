@@ -63,16 +63,55 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Add security headers
+  // Add comprehensive security headers
   const response = NextResponse.next()
-  response.headers.set('X-Frame-Options', 'DENY')
-  response.headers.set('X-Content-Type-Options', 'nosniff')
-  response.headers.set('Referrer-Policy', 'origin-when-cross-origin')
+  
+  // Prevent XSS attacks
   response.headers.set('X-XSS-Protection', '1; mode=block')
+  
+  // Prevent MIME type sniffing
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  
+  // Prevent clickjacking
+  response.headers.set('X-Frame-Options', 'DENY')
+  
+  // Enhanced referrer policy
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  
+  // Content Security Policy
   response.headers.set(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'"
+    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'self'"
   )
+  
+  // Permissions Policy (Feature Policy)
+  response.headers.set(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), accelerometer=(), gyroscope=(), magnetometer=()'
+  )
+  
+  // Strict Transport Security (HTTPS only)
+  response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
+  
+  // Cross-Origin policies for enhanced security
+  response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
+  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
+  response.headers.set('Cross-Origin-Resource-Policy', 'same-origin')
+  
+  // Remove server identification
+  response.headers.set('Server', '')
+  
+  // Performance and caching headers for static assets
+  if (pathname.startsWith('/_next/static/')) {
+    response.headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+  }
+  
+  // No cache for sensitive routes
+  if (pathname.includes('/auth') || pathname.includes('/api/auth')) {
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+  }
 
   return response
 }

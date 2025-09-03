@@ -106,7 +106,7 @@ export class StudentStorage {
       await fs.writeFile(studentFile, JSON.stringify(studentRecord, null, 2));
       return id;
     } catch (error) {
-      console.error('Error saving student:', error);
+      
       throw new Error('Failed to save student data');
     }
   }
@@ -136,7 +136,7 @@ export class StudentStorage {
       
       return null;
     } catch (error) {
-      console.error('Error getting student:', error);
+      
       return null;
     }
   }
@@ -158,7 +158,7 @@ export class StudentStorage {
       await fs.writeFile(studentFile, JSON.stringify(updatedStudent, null, 2));
       return true;
     } catch (error) {
-      console.error('Error updating student:', error);
+      
       return false;
     }
   }
@@ -209,7 +209,7 @@ export class StudentStorage {
       
       return false;
     } catch (error) {
-      console.error('Error deleting student:', error);
+      
       return false;
     }
   }
@@ -221,7 +221,7 @@ export class StudentStorage {
       
       // Check if batches directory exists
       if (!existsSync(batchesDir)) {
-        console.warn('Batches directory does not exist, creating it');
+        
         mkdirSync(batchesDir, { recursive: true });
         return [];
       }
@@ -250,13 +250,13 @@ export class StudentStorage {
                 
                 students.push(student);
               } catch (fileError) {
-                console.warn(`Error reading student file ${file}:`, fileError);
+                
                 // Continue with other files
               }
             }
           }
         } catch (batchError) {
-          console.warn(`Error reading batch directory ${batch}:`, batchError);
+          
           // Continue with other batches
         }
       }
@@ -277,7 +277,7 @@ export class StudentStorage {
       
       return students;
     } catch (error) {
-      console.error('Error getting all students:', error);
+      
       return [];
     }
   }
@@ -314,7 +314,7 @@ export class StudentStorage {
       
       return photoPath;
     } catch (error) {
-      console.error('Error saving student photo:', error);
+      
       throw error;
     }
   }
@@ -334,7 +334,7 @@ export class StudentStorage {
       
       return null;
     } catch (error) {
-      console.error('Error getting student photo:', error);
+      
       return null;
     }
   }
@@ -363,7 +363,7 @@ export class EventStorage {
       await fs.writeFile(eventFile, JSON.stringify(eventRecord, null, 2));
       return id;
     } catch (error) {
-      console.error('Error saving event:', error);
+      
       throw new Error('Failed to save event data');
     }
   }
@@ -389,7 +389,7 @@ export class EventStorage {
       }
       return null;
     } catch (error) {
-      console.error('Error getting event:', error);
+      
       return null;
     }
   }
@@ -441,7 +441,7 @@ export class EventStorage {
       
       return true;
     } catch (error) {
-      console.error('Error updating event:', error);
+      
       return false;
     }
   }
@@ -472,7 +472,7 @@ export class EventStorage {
       
       return true;
     } catch (error) {
-      console.error('Error deleting event:', error);
+      
       return false;
     }
   }
@@ -520,7 +520,7 @@ export class EventStorage {
       
       return events;
     } catch (error) {
-      console.error('Error getting all events:', error);
+      
       return [];
     }
   }
@@ -538,7 +538,7 @@ export class EventStorage {
       
       return filePath;
     } catch (error) {
-      console.error('Error saving event file:', error);
+      
       throw error;
     }
   }
@@ -560,7 +560,7 @@ export class EventStorage {
       }
       return null;
     } catch (error) {
-      console.error('Error getting event file:', error);
+      
       return null;
     }
   }
@@ -582,7 +582,7 @@ export class MetadataStorage {
       }
       return null;
     } catch (error) {
-      console.error('Error getting metadata:', error);
+      
       return null;
     }
   }

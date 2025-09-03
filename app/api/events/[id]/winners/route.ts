@@ -43,7 +43,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Error fetching winners:', error);
+    
     return NextResponse.json(
       { error: 'Failed to fetch winners data' },
       { status: 500 }
@@ -127,7 +127,7 @@ export async function POST(
     });
 
   } catch (error) {
-    console.error('Error adding winner:', error);
+    
     return NextResponse.json(
       { error: 'Failed to add winner' },
       { status: 500 }
@@ -202,7 +202,7 @@ export async function DELETE(
     });
 
   } catch (error) {
-    console.error('Error removing winner:', error);
+    
     return NextResponse.json(
       { error: 'Failed to remove winner' },
       { status: 500 }

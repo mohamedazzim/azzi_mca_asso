@@ -140,7 +140,7 @@ export class AnalyticsEngine {
         insights
       };
     } catch (error) {
-      console.error('Error generating analytics:', error);
+      
       throw new Error('Failed to generate analytics data');
     }
   }

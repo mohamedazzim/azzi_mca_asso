@@ -42,7 +42,7 @@ export default function AppHeader() {
         });
       } catch (apiError) {
         // API logout failed, but we can still clear local storage
-        console.warn('Logout API call failed:', apiError);
+        
       }
 
       // Clear user data from localStorage
@@ -61,7 +61,7 @@ export default function AppHeader() {
       
       router.replace("/login");
     } catch (error) {
-      console.error('Logout error:', error);
+      
       errorHandler(error);
       
       // Even if logout fails, try to redirect to login

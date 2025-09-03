@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error fetching performance data:', error);
+    
     return NextResponse.json(
       { error: 'Failed to fetch performance data' },
       { status: 500 }
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error adding performance record:', error);
+    
     return NextResponse.json(
       { error: 'Failed to add performance record' },
       { status: 500 }

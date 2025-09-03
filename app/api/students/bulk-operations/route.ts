@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('Error in bulk operations:', error);
+    
     return NextResponse.json(
       { error: 'Failed to perform bulk operation' },
       { status: 500 }
@@ -166,7 +166,7 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error in bulk photo upload:', error);
+    
     return NextResponse.json(
       { error: 'Failed to process bulk photo upload' },
       { status: 500 }

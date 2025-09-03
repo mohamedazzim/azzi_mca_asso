@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "timestamp": "2025-09-03T18:10:53.439Z",
+    "version": "2.0.0",
+    "description": "Final production readiness backup - all systems secured",
+    "includedPaths": [
+      "storage"
+    ],
+    "configFiles": []
+  },
+  "storage": {
+    "backups": {
+      "backup-2025-09-03T18-01-53-735Z.zip": {
+        "type": "file",
+        "data": "ewogICJtZXRhZGF0YSI6IHsKICAgICJ0aW1lc3RhbXAiOiAiMjAyNS0wOS0wM1QxODowMTo1My43MzZaIiwKICAgICJ2ZXJzaW9uIjogIjIuMC4wIiwKICAgICJkZXNjcmlwdGlvbiI6ICJUZXN0IGJhY2t1cCBmb3IgcHJvZHVjdGlvbiByZWFkaW5lc3MiLAogICAgImluY2x1ZGVkUGF0aHMiOiBbCiAgICAgICJzdG9yYWdlIgogICAgXSwKICAgICJjb25maWdGaWxlcyI6IFtdCiAgfSwKICAic3RvcmFnZSI6IHsKICAgICJiYWNrdXBzIjoge30KICB9LAogICJkYXRhIjogbnVsbCwKICAiY29uZmlnIjoge30KfQ==",
+        "originalPath": "storage/backups/backup-2025-09-03T18-01-53-735Z.zip"
+      },
+      "backup-2025-09-03T18-04-39-194Z.zip": {
+        "type": "file",
+        "data": "ewogICJtZXRhZGF0YSI6IHsKICAgICJ0aW1lc3RhbXAiOiAiMjAyNS0wOS0wM1QxODowNDozOS4xOTVaIiwKICAgICJ2ZXJzaW9uIjogIjIuMC4wIiwKICAgICJkZXNjcmlwdGlvbiI6ICJQcm9kdWN0aW9uIHJlYWRpbmVzcyB2YWxpZGF0aW9uIGJhY2t1cCIsCiAgICAiaW5jbHVkZWRQYXRocyI6IFsKICAgICAgInN0b3JhZ2UiCiAgICBdLAogICAgImNvbmZpZ0ZpbGVzIjogW10KICB9LAogICJzdG9yYWdlIjogewogICAgImJhY2t1cHMiOiB7CiAgICAgICJiYWNrdXAtMjAyNS0wOS0wM1QxOC0wMS01My03MzVaLnppcCI6IHsKICAgICAgICAidHlwZSI6ICJmaWxlIiwKICAgICAgICAiZGF0YSI6ICJld29nSUNKdFpYUmhaR0YwWVNJNklIc0tJQ0FnSUNKMGFXMWxjM1JoYlhBaU9pQWlNakF5TlMwd09TMHdNMVF4T0Rvd01UbzFNeTQzTXpaYUlpd0tJQ0FnSUNKMlpYSnphVzl1SWpvZ0lqSXVNQzR3SWl3S0lDQWdJQ0prWlhOamNtbHdkR2x2YmlJNklDSlVaWE4wSUdKaFkydDFjQ0JtYjNJZ2NISnZaSFZqZEdsdmJpQnlaV0ZrYVc1bGMzTWlMQW9nSUNBZ0ltbHVZMngxWkdWa1VHRjBhSE1pT2lCYkNpQWdJQ0FnSUNKemRHOXlZV2RsSWdvZ0lDQWdYU3dLSUNBZ0lDSmpiMjVtYVdkR2FXeGxjeUk2SUZ0ZENpQWdmU3dLSUNBaWMzUnZjbUZuWlNJNklIc0tJQ0FnSUNKaVlXTnJkWEJ6SWpvZ2UzMEtJQ0I5TEFvZ0lDSmtZWFJoSWpvZ2JuVnNiQ3dLSUNBaVkyOXVabWxuSWpvZ2UzMEtmUT09IiwKICAgICAgICAib3JpZ2luYWxQYXRoIjogInN0b3JhZ2UvYmFja3Vwcy9iYWNrdXAtMjAyNS0wOS0wM1QxOC0wMS01My03MzVaLnppcCIKICAgICAgfQogICAgfQogIH0sCiAgImRhdGEiOiBudWxsLAogICJjb25maWciOiB7fQp9",
+        "originalPath": "storage/backups/backup-2025-09-03T18-04-39-194Z.zip"
+      }
+    }
+  },
+  "data": null,
+  "config": {}
+}

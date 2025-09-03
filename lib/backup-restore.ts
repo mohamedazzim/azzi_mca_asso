@@ -73,7 +73,7 @@ export class BackupManager {
         await mkdir(BACKUP_PATH, { recursive: true });
       }
     } catch (error) {
-      console.error('Failed to create backup directory:', error);
+      
     }
   }
 
@@ -152,7 +152,7 @@ export class BackupManager {
       return backupId;
 
     } catch (error) {
-      console.error('Backup creation failed:', error);
+      
       throw new Error(`Failed to create backup: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -192,7 +192,7 @@ export class BackupManager {
 
       return students;
     } catch (error) {
-      console.error('Error backing up students:', error);
+      
       return [];
     }
   }
@@ -226,7 +226,7 @@ export class BackupManager {
       await readEventFiles(eventsDir);
       return events;
     } catch (error) {
-      console.error('Error backing up events:', error);
+      
       return [];
     }
   }
@@ -241,7 +241,7 @@ export class BackupManager {
       const usersData = await readFile(usersFile, 'utf8');
       return JSON.parse(usersData) || [];
     } catch (error) {
-      console.error('Error backing up users:', error);
+      
       return [];
     }
   }
@@ -275,7 +275,7 @@ export class BackupManager {
 
       return logs;
     } catch (error) {
-      console.error('Error backing up logs:', error);
+      
       return [];
     }
   }
@@ -318,7 +318,7 @@ export class BackupManager {
 
       await copyRecursively(sourceDir, targetDir);
     } catch (error) {
-      console.error('Error copying media files:', error);
+      
     }
   }
 
@@ -353,7 +353,7 @@ export class BackupManager {
   private async compressBackup(backupDir: string): Promise<void> {
     // This would implement backup compression
     // For now, we'll skip compression
-    console.log(`Backup at ${backupDir} ready for compression`);
+    
   }
 
   public async listBackups(): Promise<BackupListItem[]> {
@@ -385,7 +385,7 @@ export class BackupManager {
                 createdBy: metadata.createdBy
               });
             } catch (error) {
-              console.error(`Error reading backup metadata for ${backupDir}:`, error);
+              
             }
           }
         }
@@ -394,7 +394,7 @@ export class BackupManager {
       // Sort by timestamp (newest first)
       return backups.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     } catch (error) {
-      console.error('Error listing backups:', error);
+      
       return [];
     }
   }
@@ -482,7 +482,7 @@ export class BackupManager {
           restored++;
         }
       } catch (error) {
-        console.error(`Error restoring student ${student.id}:`, error);
+        
       }
     }
 
@@ -508,7 +508,7 @@ export class BackupManager {
           restored++;
         }
       } catch (error) {
-        console.error(`Error restoring event ${event.id}:`, error);
+        
       }
     }
 
@@ -522,7 +522,7 @@ export class BackupManager {
         return users.length;
       }
     } catch (error) {
-      console.error('Error restoring users:', error);
+      
     }
     
     return 0;
@@ -546,7 +546,7 @@ export class BackupManager {
         restored += await this.countFiles(eventMediaDir);
       }
     } catch (error) {
-      console.error('Error restoring media files:', error);
+      
     }
 
     return restored;
@@ -581,13 +581,13 @@ export class BackupManager {
       if (existsSync(backupDir)) {
         // In a real implementation, you'd recursively delete the directory
         // For now, we'll just log the operation
-        console.log(`Backup ${backupId} would be deleted from ${backupDir}`);
+        
         return true;
       }
       
       return false;
     } catch (error) {
-      console.error('Error deleting backup:', error);
+      
       return false;
     }
   }

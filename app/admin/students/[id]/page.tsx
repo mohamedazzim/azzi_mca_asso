@@ -343,7 +343,7 @@ function StudentDetailPageContent() {
                 setDeleteDialogOpen(false);
                 router.push("/admin/students");
               } catch (error: any) {
-                console.error("Delete error:", error);
+                
                 toast({
                   title: "Error",
                   description: error.message || "Failed to delete student",

@@ -112,7 +112,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Error fetching event gallery:', error);
+    
     return NextResponse.json(
       { error: 'Failed to fetch event gallery' },
       { status: 500 }
@@ -142,7 +142,7 @@ async function getAllEventDirectories() {
       }
     }
   } catch (error) {
-    console.error('Error listing event directories:', error);
+    
   }
   
   return directories;
@@ -223,7 +223,7 @@ export async function POST(
     }
 
   } catch (error) {
-    console.error('Error uploading file to gallery:', error);
+    
     return NextResponse.json(
       { error: 'Failed to upload file' },
       { status: 500 }

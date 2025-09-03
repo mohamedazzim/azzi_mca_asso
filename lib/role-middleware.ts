@@ -215,7 +215,7 @@ export function withRoleProtection(
       return await handler(request, ...args);
       
     } catch (error) {
-      console.error('Role protection error:', error);
+      
       return NextResponse.json(
         { 
           error: "Internal Server Error", 

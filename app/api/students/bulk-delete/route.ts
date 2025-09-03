@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ success: true, deletedCount: deletedCount });
   } catch (error) {
-    console.error("Error bulk deleting students:", error);
+    
     return NextResponse.json({ error: "Failed to bulk delete students" }, { status: 500 });
   }
 }

@@ -43,7 +43,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Error fetching attendance:', error);
+    
     return NextResponse.json(
       { error: 'Failed to fetch attendance data' },
       { status: 500 }
@@ -166,7 +166,7 @@ export async function POST(
     }
 
   } catch (error) {
-    console.error('Error processing attendance:', error);
+    
     return NextResponse.json(
       { error: 'Failed to process attendance' },
       { status: 500 }

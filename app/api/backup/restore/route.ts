@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('Error restoring backup:', error);
+    
     return NextResponse.json(
       { error: `Failed to restore backup: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }

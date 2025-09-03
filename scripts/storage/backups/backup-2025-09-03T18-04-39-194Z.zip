@@ -1,0 +1,22 @@
+{
+  "metadata": {
+    "timestamp": "2025-09-03T18:04:39.195Z",
+    "version": "2.0.0",
+    "description": "Production readiness validation backup",
+    "includedPaths": [
+      "storage"
+    ],
+    "configFiles": []
+  },
+  "storage": {
+    "backups": {
+      "backup-2025-09-03T18-01-53-735Z.zip": {
+        "type": "file",
+        "data": "ewogICJtZXRhZGF0YSI6IHsKICAgICJ0aW1lc3RhbXAiOiAiMjAyNS0wOS0wM1QxODowMTo1My43MzZaIiwKICAgICJ2ZXJzaW9uIjogIjIuMC4wIiwKICAgICJkZXNjcmlwdGlvbiI6ICJUZXN0IGJhY2t1cCBmb3IgcHJvZHVjdGlvbiByZWFkaW5lc3MiLAogICAgImluY2x1ZGVkUGF0aHMiOiBbCiAgICAgICJzdG9yYWdlIgogICAgXSwKICAgICJjb25maWdGaWxlcyI6IFtdCiAgfSwKICAic3RvcmFnZSI6IHsKICAgICJiYWNrdXBzIjoge30KICB9LAogICJkYXRhIjogbnVsbCwKICAiY29uZmlnIjoge30KfQ==",
+        "originalPath": "storage/backups/backup-2025-09-03T18-01-53-735Z.zip"
+      }
+    }
+  },
+  "data": null,
+  "config": {}
+}

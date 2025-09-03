@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       ...metadata,
     });
   } catch (err: any) {
-    console.error("UPLOAD ERROR:", err);
+    
     return NextResponse.json({ error: err.message || "Internal Server Error" }, { status: 500 });
   }
 }

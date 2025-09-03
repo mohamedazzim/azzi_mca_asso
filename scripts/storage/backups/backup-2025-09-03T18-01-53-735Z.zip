@@ -1,0 +1,16 @@
+{
+  "metadata": {
+    "timestamp": "2025-09-03T18:01:53.736Z",
+    "version": "2.0.0",
+    "description": "Test backup for production readiness",
+    "includedPaths": [
+      "storage"
+    ],
+    "configFiles": []
+  },
+  "storage": {
+    "backups": {}
+  },
+  "data": null,
+  "config": {}
+}

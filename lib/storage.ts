@@ -82,7 +82,7 @@ export async function saveStudentProfilePhoto(
     const photoUrl = `/storage/students/${sanitizedBatch}/${sanitizedRollNo}/${fileName}`;
     return { success: true, photoUrl };
   } catch (error) {
-    console.error('Error saving student profile photo:', error);
+    
     return { success: false, error: 'Failed to save profile photo.' };
   }
 }
@@ -124,7 +124,7 @@ export async function saveEventFile(
     const fileUrl = `/storage/events/${sanitizedYear}/${sanitizedMonth}/${sanitizedEventId}/${fileType}/${fileName}`;
     return { success: true, fileUrl };
   } catch (error) {
-    console.error('Error saving event file:', error);
+    
     return { success: false, error: 'Failed to save event file.' };
   }
 }
@@ -137,7 +137,7 @@ export async function saveMetadata(metadataPath: string, data: any): Promise<{ s
     await fs.writeFile(metadataPath, JSON.stringify(data, null, 2));
     return { success: true };
   } catch (error) {
-    console.error('Error saving metadata:', error);
+    
     return { success: false, error: 'Failed to save metadata.' };
   }
 }
@@ -158,7 +158,7 @@ export async function deleteFolder(folderPath: string): Promise<{ success: boole
     await fs.rm(folderPath, { recursive: true, force: true });
     return { success: true };
   } catch (error) {
-    console.error('Error deleting folder:', error);
+    
     return { success: false, error: 'Failed to delete folder.' };
   }
 }

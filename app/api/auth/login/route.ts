@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getUsers } from "@/lib/local-db"
 import bcrypt from "bcryptjs"
+import { withRateLimit, rateLimiter, RATE_LIMIT_CONFIGS } from "@/lib/rate-limiter"
 
 // Handle non-POST requests with proper JSON response
 export async function GET() {
@@ -8,6 +9,12 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = await withRateLimit(request, 'login', RATE_LIMIT_CONFIGS.login);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const { username, password } = await request.json()
 
@@ -28,6 +35,9 @@ export async function POST(request: NextRequest) {
     if (!isValidPassword) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
     }
+
+    // Record successful authentication (resets rate limit counter)
+    await rateLimiter.recordSuccessfulAuth(request.headers.get('x-forwarded-for') || 'unknown', 'login');
 
     // Create session data
     const sessionData = {
@@ -52,7 +62,6 @@ export async function POST(request: NextRequest) {
 
     return response
   } catch (error) {
-    console.error("Login error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
