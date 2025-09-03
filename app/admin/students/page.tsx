@@ -80,9 +80,9 @@ const StudentRow = memo<StudentRowProps>(({ student, selected, onSelect, canEdit
       </div>
     </TableCell>
     <TableCell>{student.rollNumber}</TableCell>
-    <TableCell>{student.phone}</TableCell>
-    <TableCell>{student.batch}</TableCell>
-    <TableCell>{student.section}</TableCell>
+    <TableCell className="hidden sm:table-cell">{student.phone}</TableCell>
+    <TableCell className="hidden md:table-cell">{student.batch}</TableCell>
+    <TableCell className="hidden lg:table-cell">{student.section}</TableCell>
     <TableCell>
       <div className="flex space-x-2">
         <Link href={`/admin/students/${student.id}`}>

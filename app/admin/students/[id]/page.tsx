@@ -11,6 +11,7 @@ import Link from "next/link"
 import { AuthGuard } from "@/components/auth-guard"
 import { useToast } from "@/hooks/use-toast"
 import { getCurrentClassFromBatch, getUserRole } from "@/lib/utils"
+import { useAuth } from "@/hooks/useAuth"
 import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 
@@ -39,6 +40,7 @@ function StudentDetailPageContent() {
   const params = useParams()
   const studentId = params.id as string
   const { toast } = useToast()
+  const { canEdit } = useAuth()
   const [student, setStudent] = useState<Student | null>(null)
   const [loading, setLoading] = useState(true)
   const [participatedEvents, setParticipatedEvents] = useState<unknown[]>([])
@@ -153,17 +155,19 @@ function StudentDetailPageContent() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Link href={`/admin/students/${student.id}/edit`}>
-                <Button>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit Profile
+            {canEdit && (
+              <div className="flex items-center space-x-2">
+                <Link href={`/admin/students/${student.id}/edit`}>
+                  <Button>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit Profile
+                  </Button>
+                </Link>
+                <Button variant="destructive" onClick={() => setDeleteDialogOpen(true)} disabled={deleting}>
+                  Delete
                 </Button>
-              </Link>
-              <Button variant="destructive" onClick={() => setDeleteDialogOpen(true)} disabled={deleting}>
-                Delete
-              </Button>
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </header>

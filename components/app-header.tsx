@@ -80,51 +80,53 @@ export default function AppHeader() {
   };
   return (
     <header className="w-full bg-white shadow-sm border-b sticky top-0 z-50">
-      {/* Replace the header row with a centered flex row and gap */}
-      <div className="flex items-center justify-center gap-40 px-4 py-2 max-w-7xl mx-auto">
+      {/* Responsive header with logos and title */}
+      <div className="flex items-center justify-between gap-2 sm:gap-4 md:gap-8 lg:gap-40 px-2 sm:px-4 py-2 max-w-7xl mx-auto">
         {/* Left Logo */}
         <div className="flex-shrink-0">
-          <Image src="/college-logo.png" alt="College Logo" width={60} height={60} className="object-contain" />
+          <Image src="/college-logo.png" alt="College Logo" width={50} height={50} className="object-contain sm:w-[60px] sm:h-[60px]" />
         </div>
-        {/* Center Text */}
-        <div className="flex flex-col items-center text-center">
-          <span className="text-lg font-bold tracking-wide text-gray-900">The Department of Master of Computer Applications (MCA)</span>
-          <span className="text-sm text-gray-600">Students Management Portal</span>
+        {/* Center Text - responsive */}
+        <div className="flex flex-col items-center text-center flex-1 min-w-0">
+          <span className="text-xs sm:text-sm md:text-base lg:text-lg font-bold tracking-wide text-gray-900 leading-tight">
+            The Department of Master of Computer Applications (MCA)
+          </span>
+          <span className="text-xs sm:text-sm text-gray-600 hidden sm:block">Students Management Portal</span>
         </div>
         {/* Right Logo */}
         <div className="flex-shrink-0">
-          <Image src="/department-logo.png" alt="Department Logo" width={60} height={60} className="object-contain" />
+          <Image src="/department-logo.png" alt="Department Logo" width={50} height={50} className="object-contain sm:w-[60px] sm:h-[60px]" />
         </div>
       </div>
-      {/* Navigation Bar */}
+      {/* Navigation Bar - responsive */}
       <nav className="bg-gray-100 border-t">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between py-2">
-          {/* Left side - Navigation Links */}
-          <div className="flex space-x-6 mx-auto">
-            <NavigationLink href="/admin/dashboard">Dashboard</NavigationLink>
-            <NavigationLink href="/admin/students">Students</NavigationLink>
-            <NavigationLink href="/admin/events">Events</NavigationLink>
-            <NavigationLink href="/admin/analytics">Analytics</NavigationLink>
-            <NavigationLink href="/admin/reports">Reports</NavigationLink>
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 flex items-center justify-between py-2">
+          {/* Navigation Links - responsive */}
+          <div className="flex space-x-2 sm:space-x-4 md:space-x-6 mx-auto overflow-x-auto">
+            <NavigationLink href="/admin/dashboard" className="whitespace-nowrap text-sm sm:text-base">Dashboard</NavigationLink>
+            <NavigationLink href="/admin/students" className="whitespace-nowrap text-sm sm:text-base">Students</NavigationLink>
+            <NavigationLink href="/admin/events" className="whitespace-nowrap text-sm sm:text-base">Events</NavigationLink>
+            <NavigationLink href="/admin/analytics" className="whitespace-nowrap text-sm sm:text-base">Analytics</NavigationLink>
+            <NavigationLink href="/admin/reports" className="whitespace-nowrap text-sm sm:text-base">Reports</NavigationLink>
           </div>
-          {/* Right side - Logout Button */}
-          <div className="flex items-center">
+          {/* Logout Button - responsive */}
+          <div className="flex items-center ml-2">
             <Button 
               variant="outline" 
               size="sm" 
-              className="flex items-center space-x-1" 
+              className="flex items-center space-x-1 text-xs sm:text-sm" 
               onClick={handleLogout}
               disabled={loggingOut}
             >
               {loggingOut ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Logging out...</span>
+                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                  <span className="hidden sm:inline">Logging out...</span>
                 </>
               ) : (
                 <>
-                  <LogOut className="h-4 w-4" />
-                  <span>Logout</span>
+                  <LogOut className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Logout</span>
                 </>
               )}
             </Button>
