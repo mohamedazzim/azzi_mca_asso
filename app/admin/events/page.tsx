@@ -14,6 +14,9 @@ import { useToast } from "@/hooks/use-toast"
 import Image from 'next/image';
 import { memo } from 'react';
 import { useAuth } from "@/hooks/useAuth"
+import { ErrorAlert } from "@/components/ui/error-alert"
+import { errorToast, successToast } from "@/components/ui/error-toast"
+import { handleError, createErrorHandler } from "@/lib/error-handler"
 
 interface Event {
   id: string
@@ -44,11 +47,16 @@ function EventsPageContent() {
   const [typeFilter, setTypeFilter] = useState("all")
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
+  const [error, setError] = useState<string | null>(null)
 
   // Fetch events from API
   const fetchEvents = useCallback(async () => {
+    const errorHandler = createErrorHandler("load event data", "event list retrieval")
+    
     try {
       setLoading(true)
+      setError(null)
+      
       const params = new URLSearchParams()
       if (searchTerm) params.append('search', searchTerm)
       if (statusFilter !== 'all') params.append('status', statusFilter)
@@ -57,56 +65,109 @@ function EventsPageContent() {
       if (endDate) params.append('endDate', endDate)
       params.append('page', page.toString())
       params.append('pageSize', pageSize.toString())
+      
       const response = await fetch(`/api/events?${params.toString()}`)
+      
       if (!response.ok) {
-        throw new Error('Failed to fetch events')
+        let errorMessage = "Failed to load event data"
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.message || errorData.error || errorMessage
+        } catch {
+          if (response.status === 500) {
+            errorMessage = "Server error while loading events. Please try again."
+          } else if (response.status === 404) {
+            errorMessage = "Event data not found. Please check if events have been added."
+          } else {
+            errorMessage = `Failed to load events (Error ${response.status}). Please refresh and try again.`
+          }
+        }
+        throw new Error(errorMessage)
       }
+      
       const data = await response.json()
+      
+      if (!data.events || !Array.isArray(data.events)) {
+        throw new Error("Invalid event data received from server")
+      }
+      
       setEvents(data.events)
-      setTotalPages(data.totalPages)
-      setTotal(data.total)
+      setTotalPages(data.totalPages || 1)
+      setTotal(data.total || 0)
     } catch (error) {
       console.error('Error fetching events:', error)
-      toast({
-        title: "Error",
-        description: "Failed to fetch events",
-        variant: "destructive",
-      })
+      const errorMessage = error instanceof Error ? error.message : "Unable to load event data"
+      setError(errorMessage)
+      errorHandler(error)
     } finally {
       setLoading(false)
     }
-  }, [searchTerm, statusFilter, typeFilter, startDate, endDate, toast, page, pageSize])
+  }, [searchTerm, statusFilter, typeFilter, startDate, endDate, page, pageSize])
 
   // Delete event
   const deleteEvent = async (id: string) => {
+    const event = events.find(e => e.id === id)
+    const eventTitle = event?.title || "Unknown Event"
+    const errorHandler = createErrorHandler("delete event", `removing ${eventTitle} from records`)
+    
     try {
       setDeletingId(id)
+      
+      if (!canEdit) {
+        errorToast("You don't have permission to delete events", {
+          title: "Permission Denied",
+          duration: 5000
+        })
+        return
+      }
+      
       const user = JSON.parse(localStorage.getItem("user") || "{}")
+      
+      if (!user.role) {
+        errorToast("User role not found. Please log out and log back in.", {
+          title: "Authentication Error",
+          duration: 5000
+        })
+        return
+      }
+      
       const response = await fetch(`/api/events/${id}`, {
         method: 'DELETE',
         headers: {
-          'x-user-role': user.role || '',
+          'x-user-role': user.role,
+          'Content-Type': 'application/json'
         },
       })
       
       if (!response.ok) {
-        throw new Error('Failed to delete event')
+        let errorMessage = `Failed to delete ${eventTitle}`
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.message || errorData.error || errorMessage
+        } catch {
+          if (response.status === 403) {
+            errorMessage = `Permission denied. You cannot delete ${eventTitle}.`
+          } else if (response.status === 404) {
+            errorMessage = `${eventTitle} not found. It may have already been deleted.`
+          } else if (response.status === 500) {
+            errorMessage = `Server error while deleting ${eventTitle}. Please try again.`
+          } else {
+            errorMessage = `Failed to delete ${eventTitle} (Error ${response.status})`
+          }
+        }
+        throw new Error(errorMessage)
       }
 
-      toast({
-        title: "Success",
-        description: "Event deleted successfully",
+      successToast(`${eventTitle} deleted successfully`, {
+        title: "Event Removed",
+        duration: 4000
       })
       
       // Refresh the list
-      fetchEvents()
+      await fetchEvents()
     } catch (error) {
       console.error('Error deleting event:', error)
-      toast({
-        title: "Error",
-        description: "Failed to delete event",
-        variant: "destructive",
-      })
+      errorHandler(error)
     } finally {
       setDeletingId(null)
     }
@@ -279,6 +340,16 @@ function EventsPageContent() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Error Display */}
+        {error && (
+          <ErrorAlert 
+            title="Data Loading Error"
+            message={error}
+            onClose={() => setError(null)}
+            className="mb-6"
+          />
+        )}
+        
         {/* Search and Filter */}
         <Card className="mb-6">
           <CardContent className="p-6 flex flex-col md:flex-row md:items-center md:space-x-4 space-y-4 md:space-y-0">

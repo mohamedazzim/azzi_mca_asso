@@ -80,7 +80,11 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error("Error fetching students:", error)
-    return NextResponse.json({ error: "Failed to fetch students" }, { status: 500 })
+    return NextResponse.json({ 
+      error: "Unable to retrieve student data",
+      message: "Database connection failed or data corruption detected. Please try again or contact support.",
+      details: error instanceof Error ? error.message : "Unknown database error"
+    }, { status: 500 })
   }
 }
 
@@ -95,14 +99,22 @@ export async function POST(request: NextRequest) {
     
     // Validate required fields
     if (!studentData.name || !studentData.rollNumber || !studentData.email) {
-      return NextResponse.json({ error: "Name, roll number, and email are required" }, { status: 400 })
+      return NextResponse.json({ 
+      error: "Missing required information", 
+      message: "Please provide all required fields: Student Name, Roll Number, and Email Address.",
+      fields: ["name", "rollNumber", "email"]
+    }, { status: 400 })
     }
 
     // Check if student with same roll number already exists
     const existingStudents = await StudentStorage.getAllStudents()
     const existingStudent = existingStudents.find(s => s.rollNumber === studentData.rollNumber)
     if (existingStudent) {
-      return NextResponse.json({ error: "Student with this roll number already exists" }, { status: 400 })
+      return NextResponse.json({ 
+      error: "Duplicate roll number detected", 
+      message: `A student with roll number '${studentData.rollNumber}' already exists in the system. Please use a different roll number.`,
+      conflictField: "rollNumber"
+    }, { status: 400 })
     }
 
     // Prepare student data
@@ -122,6 +134,10 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error("Error creating student:", error)
-    return NextResponse.json({ error: "Failed to create student" }, { status: 500 })
+    return NextResponse.json({ 
+      error: "Unable to create student record",
+      message: "Student data could not be saved due to a server error. Please check all required fields and try again.",
+      details: error instanceof Error ? error.message : "Unknown server error"
+    }, { status: 500 })
   }
 }

@@ -181,12 +181,12 @@ export async function POST(request: NextRequest) {
 
     if (files.report && files.report.size > 0) {
       const buffer = Buffer.from(await files.report.arrayBuffer())
-      filePaths.reportPath = await EventStorage.saveEventFile(eventId, buffer, 'report', files.report.name)
+      filePaths.reportPath = await EventStorage.saveEventFile(eventId, eventData.eventDate, buffer, 'report', files.report.name)
     }
 
     if (files.attendance && files.attendance.size > 0) {
       const buffer = Buffer.from(await files.attendance.arrayBuffer())
-      filePaths.attendanceSheetPath = await EventStorage.saveEventFile(eventId, buffer, 'attendance', files.attendance.name)
+      filePaths.attendanceSheetPath = await EventStorage.saveEventFile(eventId, eventData.eventDate, buffer, 'attendance', files.attendance.name)
     }
 
     if (files.photos.length > 0) {
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
       for (const photo of files.photos) {
         if (photo && photo.size > 0) {
           const buffer = Buffer.from(await photo.arrayBuffer())
-          const photoPath = await EventStorage.saveEventFile(eventId, buffer, 'photo', photo.name)
+          const photoPath = await EventStorage.saveEventFile(eventId, eventData.eventDate, buffer, 'photo', photo.name)
           photoPaths.push(photoPath)
         }
       }
@@ -215,6 +215,10 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error("Error creating event:", error)
-    return NextResponse.json({ error: "Failed to create event" }, { status: 500 })
+    return NextResponse.json({ 
+      error: "Unable to create event",
+      message: "Event could not be saved due to a server error. Please check all required fields and file formats, then try again.",
+      details: error instanceof Error ? error.message : "Unknown server error"
+    }, { status: 500 })
   }
 }

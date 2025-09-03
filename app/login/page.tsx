@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Eye, EyeOff, Loader2, Shield, User, Lock } from "lucide-react"
 import Image from "next/image"
+import { ErrorAlert } from "@/components/ui/error-alert"
+import { handleError, createErrorHandler } from "@/lib/error-handler"
 
 // Memoized components for better performance
 const LoginForm = memo<{
@@ -65,9 +67,11 @@ const LoginForm = memo<{
     </div>
     
     {error && (
-      <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-        <p className="text-red-600 text-sm">{error}</p>
-      </div>
+      <ErrorAlert 
+        title="Login Failed"
+        message={error}
+        className="mb-2"
+      />
     )}
     
     <Button
@@ -161,7 +165,15 @@ export default function LoginPage() {
     setError("")
     setLoading(true)
     
+    const errorHandler = createErrorHandler("login", "user authentication")
+    
     try {
+      // Validate inputs
+      if (!credentials.username.trim() || !credentials.password.trim()) {
+        setError("Please enter both username and password")
+        return
+      }
+
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
@@ -171,34 +183,51 @@ export default function LoginPage() {
       })
 
       if (!response.ok) {
-        // Try to parse error JSON safely, otherwise use plain text
-        const text = await response.text()
+        // Parse detailed error from server
+        let errorMessage = "Login failed"
         try {
-          const errJson = JSON.parse(text)
-          throw new Error(errJson.error || errJson.message || "Login failed")
+          const errorData = await response.json()
+          errorMessage = errorData.message || errorData.error || errorMessage
         } catch {
-          throw new Error(text || `HTTP ${response.status}`)
+          // If JSON parsing fails, use status-based message
+          if (response.status === 401) {
+            errorMessage = "Invalid username or password. Please check your credentials."
+          } else if (response.status === 500) {
+            errorMessage = "Server error occurred. Please try again in a few moments."
+          } else if (response.status >= 400) {
+            errorMessage = `Authentication failed (Error ${response.status}). Please try again.`
+          }
         }
+        
+        setError(errorMessage)
+        return
       }
 
-      // Now parse JSON safely
-      let data
-      try {
-        data = await response.json()
-      } catch (e) {
-        throw new Error("Invalid JSON response from server")
-      }
+      const data = await response.json()
 
-      if (data.success) {
-        // Store user data in localStorage for frontend access (with role)
+      if (data.success && data.user) {
+        // Store user data in localStorage for frontend access
         localStorage.setItem("user", JSON.stringify(data.user))
         router.replace("/admin/dashboard")
       } else {
-        setError(data.error || "Login failed")
+        setError(data.error || "Authentication failed. Please verify your credentials.")
       }
     } catch (error) {
       console.error('Login error:', error)
-      setError(`Network error: ${error instanceof Error ? error.message : 'Please try again.'}`)
+      
+      // Handle different types of errors with specific messages
+      let errorMessage = "Unable to sign in. Please try again."
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        errorMessage = "Network connection failed. Please check your internet connection and try again."
+      } else if (error instanceof Error) {
+        errorMessage = error.message.includes('JSON') 
+          ? "Server response error. Please try again or contact support."
+          : error.message
+      }
+      
+      setError(errorMessage)
+      errorHandler(error, false) // Log but don't show toast since we show inline error
     } finally {
       setLoading(false)
     }

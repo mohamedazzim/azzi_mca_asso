@@ -18,6 +18,9 @@ import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { getUserRole } from "@/lib/utils"
 import { useAuth } from "@/hooks/useAuth"
+import { ErrorAlert } from "@/components/ui/error-alert"
+import { errorToast, successToast } from "@/components/ui/error-toast"
+import { handleError, createErrorHandler } from "@/lib/error-handler"
 
 interface Student {
   id: string
@@ -228,6 +231,7 @@ function StudentsPageContent() {
   const [pdfUploading, setPdfUploading] = useState(false)
   const [pdfResult, setPdfResult] = useState<any>(null)
   const [pdfError, setPdfError] = useState("")
+  const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
@@ -241,8 +245,12 @@ function StudentsPageContent() {
 
   // Fetch students from API
   const fetchStudents = useCallback(async () => {
+    const errorHandler = createErrorHandler("load student data", "student list retrieval")
+    
     try {
       setLoading(true)
+      setError(null)
+      
       const params = new URLSearchParams()
       if (searchTerm) params.append('search', searchTerm)
       if (classFilter !== 'all') params.append('class', classFilter)
@@ -252,33 +260,64 @@ function StudentsPageContent() {
       params.append('pageSize', pageSize.toString())
       params.append('sortField', sortField)
       params.append('sortOrder', sortOrder)
+      
       const response = await fetch(`/api/students?${params.toString()}`)
+      
       if (!response.ok) {
-        throw new Error('Failed to fetch students')
+        let errorMessage = "Failed to load student data"
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.message || errorData.error || errorMessage
+        } catch {
+          if (response.status === 500) {
+            errorMessage = "Server error while loading students. Please try again."
+          } else if (response.status === 404) {
+            errorMessage = "Student data not found. Please check if students have been added."
+          } else {
+            errorMessage = `Failed to load students (Error ${response.status}). Please refresh and try again.`
+          }
+        }
+        throw new Error(errorMessage)
       }
+      
       const data = await response.json()
+      
+      if (!data.students || !Array.isArray(data.students)) {
+        throw new Error("Invalid student data received from server")
+      }
+      
       setStudents(data.students)
-      setTotalPages(data.totalPages)
-      setTotal(data.total)
+      setTotalPages(data.totalPages || 1)
+      setTotal(data.total || 0)
       setSelectedIds([])
       setSelectAll(false)
     } catch (error) {
       console.error('Error fetching students:', error)
-      toast({
-        title: "Error",
-        description: "Failed to fetch students",
-        variant: "destructive",
-      })
+      const errorMessage = error instanceof Error ? error.message : "Unable to load student data"
+      setError(errorMessage)
+      errorHandler(error)
     } finally {
       setLoading(false)
     }
-  }, [searchTerm, classFilter, batchFilter, sectionFilter, toast, page, pageSize, sortField, sortOrder])
+  }, [searchTerm, classFilter, batchFilter, sectionFilter, page, pageSize, sortField, sortOrder])
 
   // Delete student
   const deleteStudent = async (id: string) => {
+    const student = students.find(s => s.id === id)
+    const studentName = student?.name || "Unknown Student"
+    const errorHandler = createErrorHandler("delete student", `removing ${studentName} from records`)
+    
     try {
       setDeletingId(id)
       const userRole = canEdit ? 'admin' : 'staff'
+      
+      if (!canEdit) {
+        errorToast("You don't have permission to delete students", {
+          title: "Permission Denied",
+          duration: 5000
+        })
+        return
+      }
       
       const response = await fetch(`/api/students/${id}`, {
         method: 'DELETE',
@@ -289,56 +328,108 @@ function StudentsPageContent() {
       })
       
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to delete student')
+        let errorMessage = `Failed to delete ${studentName}`
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.message || errorData.error || errorMessage
+        } catch {
+          if (response.status === 403) {
+            errorMessage = `Permission denied. You cannot delete ${studentName}.`
+          } else if (response.status === 404) {
+            errorMessage = `${studentName} not found. They may have already been deleted.`
+          } else if (response.status === 500) {
+            errorMessage = `Server error while deleting ${studentName}. Please try again.`
+          } else {
+            errorMessage = `Failed to delete ${studentName} (Error ${response.status})`
+          }
+        }
+        throw new Error(errorMessage)
       }
 
-      toast({
-        title: "Success",
-        description: "Student deleted successfully",
+      successToast(`${studentName} deleted successfully`, {
+        title: "Student Removed",
+        duration: 4000
       })
       
       // Refresh the list
-      fetchStudents()
+      await fetchStudents()
     } catch (error) {
       console.error('Error deleting student:', error)
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete student",
-        variant: "destructive",
-      })
+      errorHandler(error)
     } finally {
       setDeletingId(null)
     }
   }
 
   const handlePdfUpload = async (file: File) => {
+    const errorHandler = createErrorHandler("upload PDF", `processing ${file.name} for student data import`)
+    
     setPdfUploading(true)
     setPdfError("")
     setPdfResult(null)
+    
     try {
+      // Validate file
+      if (!file) {
+        throw new Error("No file selected for upload")
+      }
+      
+      if (!file.type.includes('pdf')) {
+        throw new Error("Please select a PDF file. Only PDF files are supported.")
+      }
+      
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        throw new Error("PDF file is too large. Please select a file smaller than 10MB.")
+      }
+      
       const storedData = JSON.parse(localStorage.getItem("user") || "{}")
       let userRole = ""
       if (storedData.role) userRole = storedData.role
       else if (storedData.user && storedData.user.role) userRole = storedData.user.role
+      
+      if (!userRole) {
+        throw new Error("User role not found. Please log out and log back in.")
+      }
+      
       const formData = new FormData()
       formData.append("pdf", file)
+      
       const response = await fetch("/api/students/upload-pdf", {
         method: "POST",
         headers: { 'x-user-role': userRole },
         body: formData,
       })
+      
       const result = await response.json()
+      
       if (!response.ok) {
-        setPdfError(result.error || "Failed to process PDF")
+        let errorMessage = result.error || "Failed to process PDF"
+        
+        if (response.status === 400) {
+          errorMessage = result.error || "Invalid PDF format or content. Please check the file and try again."
+        } else if (response.status === 413) {
+          errorMessage = "PDF file is too large for processing. Please use a smaller file."
+        } else if (response.status === 500) {
+          errorMessage = "Server error while processing PDF. Please try again in a few moments."
+        }
+        
+        setPdfError(errorMessage)
         setPdfResult(result)
+        errorHandler(new Error(errorMessage), false) // Log but don't show toast
       } else {
         setPdfResult(result)
-        // Optionally refresh students list
-        fetchStudents()
+        successToast(`PDF processed successfully. ${result.imported || 0} students imported.`, {
+          title: "Import Complete",
+          duration: 5000
+        })
+        // Refresh students list
+        await fetchStudents()
       }
-    } catch {
-      setPdfError("Failed to upload PDF. Please try again.")
+    } catch (error) {
+      console.error('PDF upload error:', error)
+      const errorMessage = error instanceof Error ? error.message : "Failed to upload PDF. Please try again."
+      setPdfError(errorMessage)
+      errorHandler(error, false) // Log but don't show toast since we show inline error
     } finally {
       setPdfUploading(false)
     }
@@ -443,6 +534,15 @@ function StudentsPageContent() {
         </header>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {error && (
+            <ErrorAlert 
+              title="Failed to Load Students"
+              message={error}
+              onClose={() => setError(null)}
+              className="mb-6"
+            />
+          )}
+          
           <SearchSkeleton />
           
           <Card>
@@ -490,6 +590,16 @@ function StudentsPageContent() {
       {/* (Removed) */}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Error Display */}
+        {error && (
+          <ErrorAlert 
+            title="Data Loading Error"
+            message={error}
+            onClose={() => setError(null)}
+            className="mb-6"
+          />
+        )}
+        
         {/* Search and Bulk Actions */}
         <Card className="mb-6">
           <CardContent className="p-6 flex flex-col md:flex-row md:items-center md:space-x-4 space-y-4 md:space-y-0">

@@ -6,6 +6,8 @@ import { LogOut, Loader2 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { errorToast, successToast } from "@/components/ui/error-toast";
+import { createErrorHandler } from "@/lib/error-handler";
 
 export default function AppHeader() {
   const pathname = usePathname();
@@ -16,11 +18,61 @@ export default function AppHeader() {
 
   const handleLogout = async () => {
     setLoggingOut(true);
+    const errorHandler = createErrorHandler("logout", "user session cleanup");
+    
     try {
-      // Add a small delay to show the loading state
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Check if user is still logged in
+      const user = localStorage.getItem("user");
+      if (!user) {
+        errorToast("You are already logged out", {
+          title: "Session Status"
+        });
+        router.replace("/login");
+        return;
+      }
+
+      // Call logout API if it exists
+      try {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+      } catch (apiError) {
+        // API logout failed, but we can still clear local storage
+        console.warn('Logout API call failed:', apiError);
+      }
+
+      // Clear user data from localStorage
       localStorage.removeItem("user");
+      
+      // Clear any other session-related data
+      localStorage.removeItem("lastActivity");
+      
+      // Add a small delay to show the loading state
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      successToast("Logged out successfully", {
+        title: "Session Ended",
+        duration: 3000
+      });
+      
       router.replace("/login");
+    } catch (error) {
+      console.error('Logout error:', error);
+      errorHandler(error);
+      
+      // Even if logout fails, try to redirect to login
+      try {
+        localStorage.removeItem("user");
+        router.replace("/login");
+      } catch (redirectError) {
+        errorToast("Logout completed but navigation failed. Please refresh the page.", {
+          title: "Navigation Error",
+          duration: 8000
+        });
+      }
     } finally {
       setLoggingOut(false);
     }
