@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { errorToast, successToast } from "@/components/ui/error-toast";
 import { createErrorHandler } from "@/lib/error-handler";
+import { NavigationLink } from "@/components/navigation-link";
 
 export default function AppHeader() {
   const pathname = usePathname();
@@ -100,11 +101,11 @@ export default function AppHeader() {
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between py-2">
           {/* Left side - Navigation Links */}
           <div className="flex space-x-6 mx-auto">
-            <Link href="/admin/dashboard" className="text-gray-700 hover:text-blue-700 font-medium">Dashboard</Link>
-            <Link href="/admin/students" className="text-gray-700 hover:text-blue-700 font-medium">Students</Link>
-            <Link href="/admin/events" className="text-gray-700 hover:text-blue-700 font-medium">Events</Link>
-            <Link href="/admin/analytics" className="text-gray-700 hover:text-blue-700 font-medium">Analytics</Link>
-            <Link href="/admin/reports" className="text-gray-700 hover:text-blue-700 font-medium">Reports</Link>
+            <NavigationLink href="/admin/dashboard">Dashboard</NavigationLink>
+            <NavigationLink href="/admin/students">Students</NavigationLink>
+            <NavigationLink href="/admin/events">Events</NavigationLink>
+            <NavigationLink href="/admin/analytics">Analytics</NavigationLink>
+            <NavigationLink href="/admin/reports">Reports</NavigationLink>
           </div>
           {/* Right side - Logout Button */}
           <div className="flex items-center">

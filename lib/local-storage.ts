@@ -121,7 +121,16 @@ export class StudentStorage {
         const studentFile = path.join(batchesDir, batch, `${id}.json`);
         if (existsSync(studentFile)) {
           const data = await fs.readFile(studentFile, 'utf-8');
-          return JSON.parse(data);
+          const student = JSON.parse(data);
+          
+          // Ensure photo field is set correctly for UI consumption
+          if (student.photoPath && existsSync(student.photoPath)) {
+            student.photo = `/api/students/${student.id}/photo`;
+          } else {
+            student.photo = null;
+          }
+          
+          return student;
         }
       }
       
@@ -231,6 +240,14 @@ export class StudentStorage {
                 const filePath = path.join(batchDir, file);
                 const data = await fs.readFile(filePath, 'utf-8');
                 const student = JSON.parse(data);
+                
+                // Ensure photo field is set correctly for UI consumption
+                if (student.photoPath && existsSync(student.photoPath)) {
+                  student.photo = `/api/students/${student.id}/photo`;
+                } else {
+                  student.photo = null;
+                }
+                
                 students.push(student);
               } catch (fileError) {
                 console.warn(`Error reading student file ${file}:`, fileError);
