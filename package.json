@@ -7,7 +7,12 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-    "seed": "node scripts/seed-data.js"
+    "seed": "node scripts/seed-data.js",
+    "migrate:import": "node scripts/migrate-import.js",
+    "backup": "node scripts/backup.js",
+    "restore": "node scripts/restore.js",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -51,7 +56,9 @@
     "dotenv": "^17.2.0",
     "embla-carousel-react": "8.5.1",
     "fuzzball": "^2.2.2",
+    "html2canvas": "^1.4.1",
     "input-otp": "1.4.1",
+    "jspdf": "^3.0.2",
     "lucide-react": "^0.454.0",
     "mongodb": "^6.17.0",
     "mongoose": "^8.16.2",

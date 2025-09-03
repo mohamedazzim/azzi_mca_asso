@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { EventStorage } from "@/lib/local-storage"
+import { saveEventFile, saveEventMetadata } from "@/lib/storage"
 
 function toCSV(events: any[]): string {
   const header = [
@@ -176,17 +177,25 @@ export async function POST(request: NextRequest) {
 
     const eventId = await EventStorage.saveEvent(eventData)
 
-    // Save uploaded files
+    // Save uploaded files using new storage system
     const filePaths: any = {}
+    const eventYear = new Date(eventData.eventDate).getFullYear().toString()
+    const eventMonth = String(new Date(eventData.eventDate).getMonth() + 1).padStart(2, '0') + '-' + new Date(eventData.eventDate).toLocaleString('default', { month: 'long' })
 
     if (files.report && files.report.size > 0) {
       const buffer = Buffer.from(await files.report.arrayBuffer())
-      filePaths.reportPath = await EventStorage.saveEventFile(eventId, eventData.eventDate, buffer, 'report', files.report.name)
+      const result = await saveEventFile(eventYear, eventMonth, eventId, buffer, files.report.type, files.report.name, 'reports')
+      if (result.success) {
+        filePaths.reportPath = result.fileUrl
+      }
     }
 
     if (files.attendance && files.attendance.size > 0) {
       const buffer = Buffer.from(await files.attendance.arrayBuffer())
-      filePaths.attendanceSheetPath = await EventStorage.saveEventFile(eventId, eventData.eventDate, buffer, 'attendance', files.attendance.name)
+      const result = await saveEventFile(eventYear, eventMonth, eventId, buffer, files.attendance.type, files.attendance.name, 'attendance')
+      if (result.success) {
+        filePaths.attendanceSheetPath = result.fileUrl
+      }
     }
 
     if (files.photos.length > 0) {
@@ -194,14 +203,27 @@ export async function POST(request: NextRequest) {
       for (const photo of files.photos) {
         if (photo && photo.size > 0) {
           const buffer = Buffer.from(await photo.arrayBuffer())
-          const photoPath = await EventStorage.saveEventFile(eventId, eventData.eventDate, buffer, 'photo', photo.name)
-          photoPaths.push(photoPath)
+          const result = await saveEventFile(eventYear, eventMonth, eventId, buffer, photo.type, photo.name, 'photos')
+          if (result.success) {
+            photoPaths.push(result.fileUrl)
+          }
         }
       }
       if (photoPaths.length > 0) {
         filePaths.photoPaths = photoPaths
       }
     }
+
+    // Save event metadata in the new storage structure
+    const enhancedEventData = {
+      ...eventData,
+      ...filePaths,
+      id: eventId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+    
+    await saveEventMetadata(eventYear, eventMonth, eventId, enhancedEventData)
 
     // Update event with file paths
     if (Object.keys(filePaths).length > 0) {

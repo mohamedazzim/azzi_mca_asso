@@ -252,13 +252,28 @@ function AddStudentPageContent() {
         userRole = storedData.user.role
       }
       
+      // Create FormData to support file upload
+      const submitFormData = new FormData()
+      
+      // Add all form fields to FormData
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value) {
+          submitFormData.append(key, value)
+        }
+      })
+      
+      // Add photo file if selected
+      if (selectedFile) {
+        submitFormData.append('photo', selectedFile)
+      }
+      
       const response = await fetch('/api/students', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'x-user-role': userRole,
+          // Don't set Content-Type for FormData - browser sets it automatically with boundary
         },
-        body: JSON.stringify(formData),
+        body: submitFormData,
       })
 
       if (!response.ok) {
@@ -268,30 +283,7 @@ function AddStudentPageContent() {
       }
 
       const result = await response.json()
-      const studentId = result.id
-      
-      // If there's a selected photo, upload it
-      if (selectedFile && studentId) {
-        try {
-          const user = JSON.parse(localStorage.getItem("user") || "{}")
-          const photoFormData = new FormData()
-          photoFormData.append('photo', selectedFile)
-          photoFormData.append('studentId', studentId)
-          const photoResponse = await fetch('/api/students/upload-photo', {
-            method: 'POST',
-            headers: {
-              'x-user-role': user.role || '',
-            },
-            body: photoFormData,
-          })
-          if (!photoResponse.ok) {
-            const photoErrorData = await photoResponse.json()
-            // Don't throw error here, just log it as the student was created successfully
-          }
-        } catch (photoError) {
-          // Don't throw error here, just log it as the student was created successfully
-        }
-      }
+      console.log('Student created with photo:', result)
       
       toast({
         title: "Success",
