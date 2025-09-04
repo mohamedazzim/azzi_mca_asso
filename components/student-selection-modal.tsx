@@ -11,7 +11,7 @@ import {
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
-import { getActiveFormattedBatchOptions } from "@/lib/batch-utils";
+import { getFormattedBatchOptions } from "@/lib/batch-utils";
 
 interface Student {
   id: string;
@@ -91,7 +91,7 @@ export const StudentSelectionModal: React.FC<StudentSelectionModalProps> = ({ op
         <div className="flex gap-2 mb-2">
           <select value={batch} onChange={e => setBatch(e.target.value)} className="border rounded px-2 py-1">
             <option value="all">All Batches</option>
-            {getActiveFormattedBatchOptions().map(option => (
+            {getFormattedBatchOptions().map(option => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>

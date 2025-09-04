@@ -14,7 +14,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { AuthGuard } from "@/components/auth-guard"
 import { useToast } from "@/hooks/use-toast"
-import { getActiveFormattedBatchOptions } from "@/lib/batch-utils"
+import { getFormattedBatchOptions } from "@/lib/batch-utils"
 
 
 // Memoized components for better performance
@@ -349,8 +349,8 @@ function AddStudentPageContent() {
     setPreviewUrl("")
   }, [previewUrl])
 
-  // Form field configurations - Dynamic batch options
-  const batchOptions = getActiveFormattedBatchOptions()
+  // Form field configurations - All batch options including historical (1980-present)
+  const batchOptions = getFormattedBatchOptions()
 
   const sectionOptions = [
     { value: "A", label: "A" },

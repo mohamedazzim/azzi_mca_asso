@@ -173,7 +173,7 @@ async function handleGET(request: NextRequest) {
       section: student.section,
       gender: student.gender,
       dob: student.dateOfBirth,
-      photo: student.photoPath ? `/api/students/${student.id}/photo` : null,
+      photo: (student.photoPath || student.photoUrl) ? `/api/students/${student.id}/photo` : null,
       isActive: student.isActive !== false, // default to true if not specified
       createdAt: student.createdAt,
     }))

@@ -1,0 +1,21 @@
+{
+  "name": "Azzim J",
+  "rollNumber": "245213133",
+  "email": "Azzim@bhc.edu.in",
+  "phone": "6380083647",
+  "batch": "2024-2026",
+  "section": "A",
+  "gender": "Male",
+  "dateOfBirth": "2003-07-06T00:00:00.000Z",
+  "address": "Manthurai",
+  "guardianName": "Jahir Hussain",
+  "guardianPhone": "9842037316",
+  "bloodGroup": "O+",
+  "hostellerStatus": "Dayscholar",
+  "batchYear": "2024-2026",
+  "isActive": true,
+  "photoUrl": "/storage/students/2024-2026/245213133/profile.jpg",
+  "id": "f5568ce6-5f38-46b0-8ea4-abba0077baf8",
+  "createdAt": "2025-09-04T07:15:56.823Z",
+  "updatedAt": "2025-09-04T07:15:56.823Z"
+}
