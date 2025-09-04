@@ -14,6 +14,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { AuthGuard } from "@/components/auth-guard"
 import { useToast } from "@/hooks/use-toast"
+import { getActiveFormattedBatchOptions } from "@/lib/batch-utils"
 
 // Memoized components for better performance
 const PhotoUpload = memo<{
@@ -433,9 +434,9 @@ function EditStudentPageContent() {
 
   // Form field configurations
   const batchOptions = [
-    { value: "2023-2025", label: "2023-2025" },
-    { value: "2024-2026", label: "2024-2026" },
-    { value: "2025-2027", label: "2025-2027" }
+    ...getActiveFormattedBatchOptions()
+
+
   ]
 
   const sectionOptions = [

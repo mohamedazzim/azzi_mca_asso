@@ -21,6 +21,7 @@ import { useAuth } from "@/hooks/useAuth"
 import { ErrorAlert } from "@/components/ui/error-alert"
 import { errorToast, successToast } from "@/components/ui/error-toast"
 import { handleError, createErrorHandler } from "@/lib/error-handler"
+import { getFormattedBatchOptions } from "@/lib/batch-utils"
 
 interface Student {
   id: string
@@ -511,7 +512,7 @@ function StudentsPageContent() {
   })
 
   // Get unique batches and sections for filters
-  const batches = Array.from(new Set(students.map(s => s.batch).filter(Boolean)));
+  const batches = getFormattedBatchOptions().map(option => option.value);
   const sections = Array.from(new Set(students.map(s => s.section).filter(Boolean)));
 
   if (loading) {
